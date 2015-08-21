@@ -1,0 +1,54 @@
+params:
+  mass: .156
+  Jx: 0.1147
+  Jy: 0.0576
+  Jz: 0.1712
+  Jxz: 0.00015
+  S: 0.2589
+  b: 1.4224
+  c: 0.3301
+  S_prop: 0.0314
+  rho: 1.2682
+  k_motor: 20
+  kT_p: 0
+  kOmega: 0
+  e: 0.9
+
+longitudinal_coeffs:
+  CL0: .09167
+  CD0: 0.01631
+  Cm0: -0.023338
+  CL_alpha: 3.5016
+  CD_alpha: 0.2108
+  Cm_alpha: -0.5675
+  CL_q: 2.8932
+  CD_q: 0.
+  Cm_q: -1.3990
+  CL_delta_e: 0.2724
+  CD_delta_e: 0.3045
+  Cm_delta_e: -0.3254
+  C_prop: 1.0
+  M: 50
+  alpha_0: 0.4712
+  epsilon: 0.1592
+  CD_p: 0.0254
+
+lateral_coeffs:
+  CY0: 0.
+  Cl0: 0.
+  Cn0: 0.
+  CY_beta: -0.07359
+  Cl_beta: -0.02854
+  Cn_beta: -0.00040
+  CY_p: 0.
+  Cl_p: -0.3209
+  Cn_p: -0.01297
+  CY_r: 0.
+  Cl_r: 0.03066
+  Cn_r: -0.00434
+  CY_delta_a: 0.
+  Cl_delta_a: 0.1682
+  Cn_delta_a: -0.00328
+  CY_delta_r: 0
+  Cl_delta_r: 0.
+  Cn_delta_r: 0.
