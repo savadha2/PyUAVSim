@@ -320,8 +320,8 @@ class  FixedWingUAVDynamics(DynamicsBase):
             sigmoid_alpha = (1 + c1 + c2)/((1 + c1) * (1 + c2))
             CL_alpha_NL = (1. - sigmoid_alpha) * (CL0 + CL_alpha * alpha) + sigmoid_alpha * 2. * np.sign(alpha) * np.sin(alpha) * np.sin(alpha) * np.cos(alpha)
             AR = b**2/S
-            CD_alpha = CD_p + (CL0 + CL_alpha * alpha)**2/(np.pi * e * AR)
-            CX  = -CD_alpha * np.cos(alpha) + CL_alpha_NL * np.sin(alpha)
+            CD_alpha_NL = CD_p + (CL0 + CL_alpha * alpha)**2/(np.pi * e * AR)
+            CX  = -CD_alpha_NL * np.cos(alpha) + CL_alpha_NL * np.sin(alpha)
             CX_delta_e = -CD_delta_e * np.cos(alpha) + CL_delta_e * np.sin(alpha)
             CX_q = -CD_q * np.cos(alpha) + CL_q * np.sin(alpha)
             C2 = 2 * mass * (-r * v  + q * w + g * np.sin(theta))
