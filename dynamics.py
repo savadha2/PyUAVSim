@@ -463,12 +463,11 @@ class  FixedWingUAVDynamics(DynamicsBase):
                 iters += 1
                 print 'J0, dJ_alpha, dJ_beta, dJ_phi', J0, dJ_dalpha, dJ_dbeta, dJ_dphi
             return alpha, beta, phi
-#        alpha = -0.0
-#        beta = 0.
-#        phi = 0.
+        alpha_0 = -0.0
+        beta_0 = 0.
+        phi_0 = 0.
         
-        alpha, beta, phi = gradient_descent(0., 0., 0.)
-        print 'alpha, beta, phi: ', alpha, beta, phi
+        alpha, beta, phi = gradient_descent(alpha_0, beta_0, phi_0)
         trimmed_state, trimmed_control = self.compute_trimmed_states_inputs(Va, gamma, R, alpha, beta, phi)
         
         return trimmed_state, trimmed_control
