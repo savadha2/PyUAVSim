@@ -89,6 +89,12 @@ class FixedWingUAV:
              self.dynamics.integrate(t)
          else:
              raise Exception('set control inputs first')
+         
+    def set_state(self, x, t):
+        self.dynamics.integrator.set_initial_value(x, t)
+        
+    def set_control_inputs(self, control_inputs):
+        self.dynamics.control_inputs = control_inputs
         
 #    def __call__(self, t):
 #        self.dynamics.integrate(t)
