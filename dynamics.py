@@ -46,7 +46,7 @@ class  FixedWingUAVDynamics(DynamicsBase):
         self.actuator_commands = [-0.083782251798531229, -5.2373899469808999e-07, 0.0, 0.50102375844986302]
         self.integrator.set_f_params(self.config, self.actuator_commands, self.partial_forces_and_moments)
     @staticmethod
-    def forces_and_moments(y, actuator_commands, config):
+    def forces_and_moments(y, control_inputs, config):
         mass = config['params']['mass']
         S = config['params']['S']
         b = config['params']['b']
@@ -78,10 +78,10 @@ class  FixedWingUAVDynamics(DynamicsBase):
         alpha = np.arctan(w/u)
         beta = np.arcsin(v/Va)
                 
-        delta_e = actuator_commands[0]
-        delta_a = actuator_commands[1]
-        delta_r = actuator_commands[2]
-        delta_t = actuator_commands[3]
+        delta_e = control_inputs[0]
+        delta_a = control_inputs[1]
+        delta_r = control_inputs[2]
+        delta_t = control_inputs[3]
 
         def longitudinal_aerodynamic_forces_moments():#srho, c, S, Va, Clong_coeffs, alpha, q, delta_e):
             CL0 = Clong_coeffs['CL0']
@@ -181,7 +181,7 @@ class  FixedWingUAVDynamics(DynamicsBase):
         return [fx, fy, fz], [l, m, n]
         
     @staticmethod
-    def dynamics(t, y, config, actuator_commands, forces_and_moments):
+    def dynamics(t, y, config, control_inputs, forces_and_moments):
         mass = config['params']['mass']
         Jx = config['params']['Jx']
         Jy = config['params']['Jy']
@@ -219,7 +219,7 @@ class  FixedWingUAVDynamics(DynamicsBase):
         cy = np.cos(psi)
         sy = np.sin(psi)
         
-        forces, moments = forces_and_moments(y, actuator_commands)
+        forces, moments = forces_and_moments(y, control_inputs)
         fx = forces[0]
         fy = forces[1]
         fz = forces[2]
@@ -374,9 +374,9 @@ class  FixedWingUAVDynamics(DynamicsBase):
             
         delta_a, delta_r = delta_a_delta_r()
 
-        actuator_commands = [delta_e, delta_a, delta_r, delta_t]
+        control_inputs = [delta_e, delta_a, delta_r, delta_t]
         
-        return x, actuator_commands
+        return x, control_inputs
     
     def J(self, alpha, beta, phi, Va, gamma, turn_radius, config):
         mass = config['params']['mass']
