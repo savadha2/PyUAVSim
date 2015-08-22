@@ -444,7 +444,7 @@ class  FixedWingUAVDynamics(DynamicsBase):
     def trim(self, Va, gamma, turn_radius):
         R = turn_radius
         J = partial(self.J, Va = Va, gamma = gamma, turn_radius = R, config = self.config)
-        def gradient_descent(alpha, beta, phi, kappa = 1e-6, max_iters = 500, epsilon = 1e-4):
+        def gradient_descent(alpha, beta, phi, kappa = 1e-6, max_iters = 5000, epsilon = 1e-8):
             iters = 0
             J0 = np.inf
             while(iters < max_iters):
