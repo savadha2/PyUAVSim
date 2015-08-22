@@ -300,8 +300,7 @@ class  FixedWingUAVDynamics(DynamicsBase):
             Cm_alpha = Clong_coeffs['Cm_alpha']
             Cm_q = Clong_coeffs['Cm_q']
             Cm_delta_e = Clong_coeffs['Cm_delta_e']
-            Cm_alpha = Cm0 + Cm_alpha * alpha
-            return (C1 - Cm_alpha - Cm_q * c * q * 0.5/Va)/Cm_delta_e
+            return (C1 - Cm0 - Cm_alpha * alpha - Cm_q * c * q * 0.5/Va)/Cm_delta_e
         delta_e = delta_e()
         
         def delta_t():
