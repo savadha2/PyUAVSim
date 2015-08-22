@@ -17,8 +17,9 @@ class FixedWingUAV:
     
     def __init__(self, x0, t0, dynamics_config_file, ax):
         self.vertices = np.matrix(np.zeros((16, 3), dtype = np.double))
-        self.x = np.zeros((12,), dtype = np.double)
-        self.x = x0
+#        self.x = np.zeros((12,), dtype = np.double)
+#        self.x = x0
+#        self.t = t0
         self.vertices[0, :] =  [self.fuse_l1, 0.0, 0.0]
         self.vertices[1, :] = [self.fuse_l2, 0.5*self.fuse_w, 0.5*self.fuse_h]
         self.vertices[2, :] = [self.fuse_l2, -0.5*self.fuse_w, 0.5*self.fuse_h]
@@ -43,7 +44,7 @@ class FixedWingUAV:
         self.tail_wing = [[10, 11, 12, 13]]
         self.tail = [[5, 14, 15]]
         self.faces = [self.nose, self.fuselage, self.wing, self.tail_wing, self.tail]
-        self.viewer = UAVViewer(ax, (self.rotate(self.x[6:9]) + self.x[0:3]), self.faces, ['r', 'g', 'g', 'g', 'y'])
+        self.viewer = UAVViewer(ax, (self.rotate(x0[6:9]) + x0[0:3]), self.faces, ['r', 'g', 'g', 'g', 'y'])
         self.dynamics = FixedWingUAVDynamics(x0, t0, 0.001, dynamics_config_file)
     
     def move_to(self, pos):
@@ -79,13 +80,15 @@ class FixedWingUAV:
         return vertices
     
     def update_view(self):
-        vertices = self.rotate(self.x[6:9]) + self.x[0:3]
+        vertices = self.rotate(self.dynamics.x[6:9]) + self.dynamics.x[0:3]
         self.viewer.update(vertices)
     
-    def update_state(self, dt):         
-         t = dt + self.dynamics.integrator.t
-         self.dynamics.integrate(t)
-         self.x = self.dynamics.integrator.y
+    def update_state(self, dt):
+         if self.dynamics.control_inputs is not None:
+             t = dt + self.dynamics.integrator.t
+             self.dynamics.integrate(t)
+         else:
+             raise Exception('set control inputs first')
         
 #    def __call__(self, t):
 #        self.dynamics.integrate(t)
