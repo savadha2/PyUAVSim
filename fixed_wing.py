@@ -1,5 +1,5 @@
 import numpy as np
-from viewer import UAVViewer
+from viewer.viewer import UAVViewer
 from dynamics import FixedWingUAVDynamics
 #import scipy as sp
 #import matplotlib.colors as colors    
