@@ -44,8 +44,6 @@ class  FixedWingUAVDynamics(DynamicsBase):
         self.set_integrator(FixedWingUAVDynamics.dynamics, 'dop853', jac = None, atol = 1e-6)        
         self.partial_forces_and_moments = partial(FixedWingUAVDynamics.forces_and_moments, config = self.config)
         self._control_inputs = None
-        self.actuator_commands = [-0.083782251798531229, -5.2373899469808999e-07, 0.0, 0.50102375844986302]
-        self.integrator.set_f_params(self.config, self.actuator_commands, self.partial_forces_and_moments)
     @staticmethod
     def forces_and_moments(y, control_inputs, config):
         mass = config['params']['mass']
@@ -178,7 +176,7 @@ class  FixedWingUAVDynamics(DynamicsBase):
         l = l_aerodynamic + l_prop        
         m = m_aerodynamic + m_prop        
         n = n_aerodynamic + n_prop
-        #print 'fz: ', fz
+        
         return [fx, fy, fz], [l, m, n]
         
     @staticmethod
@@ -240,7 +238,6 @@ class  FixedWingUAVDynamics(DynamicsBase):
         dy[8] = sr/cp * q + cr/cp * r        
         dy[9] = gamma_1 * p * q - gamma_2 * q * r + gamma_3 * l + gamma_4 * n
         dy[10] = gamma_5 * p * r - gamma_6 * (p * p - r * r) + m/Jy
-        #print 'theta: ', theta
         dy[11] = gamma_7 * p * q - gamma_1 * q * r + gamma_4 * l + gamma_8 * n
                 
         return dy
@@ -327,7 +324,6 @@ class  FixedWingUAVDynamics(DynamicsBase):
             C2 = 2 * mass * (-r * v  + q * w + g * np.sin(theta))
             C3 = -2 * C0 * (CX + CX_q * c * q * 0.5/Va + CX_delta_e * delta_e )
             C4 = rho * C_prop * S_prop * k_motor**2
-            print 'C2, C3, C4', C2, C3, C4
             return np.sqrt((C2 + C3)/C4 + Va**2/k_motor**2)
         delta_t = delta_t()
         
@@ -434,11 +430,6 @@ class  FixedWingUAVDynamics(DynamicsBase):
         xdot[2] = -Va * np.sin(gamma)
         xdot[8] = Va/turn_radius * np.cos(gamma)
         J = np.linalg.norm(xdot[2:] - f[2:])**2
-        print 'xdot: ', xdot
-        print 'trimmed control: ', trimmed_control
-        print 'f: ', f
-        print 'J: ', J
-        print 'f[10]: ', f[10]
         return J
             
     def trim(self, Va, gamma, turn_radius):
@@ -451,17 +442,15 @@ class  FixedWingUAVDynamics(DynamicsBase):
                 alpha_plus = alpha + epsilon
                 beta_plus = beta + epsilon
                 phi_plus = phi + epsilon
-                print '----------START------------'
                 J0 = J(alpha, beta, phi)
                 dJ_dalpha = (J(alpha_plus, beta, phi) - J0)/epsilon
-                print '-----------END--------------'
                 dJ_dbeta = (J(alpha, beta_plus, phi) - J0)/epsilon
                 dJ_dphi = (J(alpha, beta, phi_plus) - J0)/epsilon
                 alpha = alpha - kappa * dJ_dalpha
                 beta = beta - kappa * dJ_dbeta
                 phi = phi - kappa * dJ_dphi
                 iters += 1
-                print 'J0, dJ_alpha, dJ_beta, dJ_phi', J0, dJ_dalpha, dJ_dbeta, dJ_dphi
+                print 'J: %f at iteration %d' % (J0, iters)
             return alpha, beta, phi
         alpha_0 = -0.0
         beta_0 = 0.
@@ -479,47 +468,6 @@ class  FixedWingUAVDynamics(DynamicsBase):
     def control_inputs(self, inputs):
         self._control_inputs = inputs
         self.integrator.set_f_params(self.config, self._control_inputs, self.partial_forces_and_moments)
-    def test_compute_alpha(self, y, config):
-        actuator_commands = self.actuator_commands
-        mass = config['params']['mass']
-        S = config['params']['S']
-        b = config['params']['b']
-        c = config['params']['c']
-        rho = config['params']['rho']
-        
-        Clong_coeffs = config['longitudinal_coeffs']
-        
-        #pn = y[0]
-        #pe = y[1]
-        #pd = y[2]
-        u = y[3]
-        v = y[4]
-        w = y[5]                
-        phi = y[6]
-        theta = y[7]
-        psi = y[8]
-        p = y[9]
-        q = y[10]
-        r = y[11]        
-
-        Va = np.sqrt(u**2 + v**2 + w**2)
-#        alpha = np.arctan(w/u)
-#        beta = np.arcsin(v/Va)
-                
-        delta_e = actuator_commands[0]
-        
-        g = 9.81
-        fz_gravity = mass * g * np.cos(theta) * np.cos(phi)
-        
-        CL0 = Clong_coeffs['CL0']
-        CL_alpha = Clong_coeffs['CL_alpha']
-        CL_q = Clong_coeffs['CL_q']
-        CL_delta_e = Clong_coeffs['CL_delta_e']        
-        
-        alpha = (fz_gravity/(0.5 * rho * Va**2 * S) - CL_q * c * q * 0.5/Va - CL_delta_e * delta_e - CL0)/(CL_alpha)
-        
-        return alpha
-        
         
         
             
