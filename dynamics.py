@@ -43,6 +43,7 @@ class  FixedWingUAVDynamics(DynamicsBase):
         self.t0 = t0
         self.set_integrator(FixedWingUAVDynamics.dynamics, 'dop853', jac = None, atol = 1e-6)        
         self.partial_forces_and_moments = partial(FixedWingUAVDynamics.forces_and_moments, config = self.config)
+        self._control_inputs = None
         self.actuator_commands = [-0.083782251798531229, -5.2373899469808999e-07, 0.0, 0.50102375844986302]
         self.integrator.set_f_params(self.config, self.actuator_commands, self.partial_forces_and_moments)
     @staticmethod
@@ -473,6 +474,13 @@ class  FixedWingUAVDynamics(DynamicsBase):
         
         return trimmed_state, trimmed_control
     
+    @property
+    def control_inputs(self):
+        return self._control_inputs
+    @control_inputs.setter
+    def control_inputs(self, inputs):
+        self._control_inputs = inputs
+        self.integrator.set_f_params(self.config, self._control_inputs, self.partial_forces_and_moments)
     def test_compute_alpha(self, y, config):
         actuator_commands = self.actuator_commands
         mass = config['params']['mass']
