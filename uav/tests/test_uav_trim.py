@@ -1,7 +1,7 @@
 import numpy as np
 import mpl_toolkits.mplot3d as a3
 import pylab as pl
-from fixed_wing import FixedWingUAV#, FixedWingUAVDynamics
+from uav.fixed_wing import FixedWingUAV#, FixedWingUAVDynamics
 
 ax = a3.Axes3D(pl.figure(1))
 ax.set_xlim3d(-20, 20)
