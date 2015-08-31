@@ -432,10 +432,10 @@ class  FixedWingUAVDynamics(DynamicsBase):
         J = np.linalg.norm(xdot[2:] - f[2:])**2
         return J
             
-    def trim(self, Va, gamma, turn_radius):
+    def trim(self, Va, gamma, turn_radius, max_iters=5000, epsilon=1e-8, kappa=1e-6):
         R = turn_radius
         J = partial(self.J, Va = Va, gamma = gamma, turn_radius = R, config = self.config)
-        def gradient_descent(alpha, beta, phi, kappa = 1e-6, max_iters = 5000, epsilon = 1e-8):
+        def gradient_descent(alpha, beta, phi):
             iters = 0
             J0 = np.inf
             while(iters < max_iters):
