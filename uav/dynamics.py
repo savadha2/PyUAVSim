@@ -473,6 +473,25 @@ class  FixedWingUAVDynamics(DynamicsBase):
         dy[10] = gamma_5 * p * r - gamma_6 * (p * p - r * r) + m/Jy
         dy[11] = gamma_7 * p * q - gamma_1 * q * r + gamma_4 * l + gamma_8 * n
         return dy
+        
+    def linearize(self, nominal_state, nominal_control_input, epsilon=1e-8):
+        A = np.zeros((12, 12), dtype=np.double)
+        B = np.zeros((12, 4), dtype=np.double)
+        f_nominal =  self.f(nominal_state, nominal_control_input)        
+        state_mask = np.zeros((12,), dtype=np.double)
+        input_mask = np.zeros((4,), dtype=np.double)
+        for col in range(12):
+            state_mask[col] = 1.0
+            f_ = self.f(nominal_state + epsilon * state_mask, nominal_control_input) 
+            A[:, col] = (f_ - f_nominal)/epsilon
+            state_mask[col] = 0.0
+        for col in range(4):
+            input_mask[col] = 1.0
+            f_ = self.f(nominal_state, nominal_control_input + epsilon * input_mask) 
+            B[:, col] = (f_ - f_nominal)/epsilon
+            input_mask[col] = 0.0
+        return A, B
+        
     @property
     def control_inputs(self):
         return self._control_inputs
