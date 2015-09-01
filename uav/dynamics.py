@@ -373,68 +373,20 @@ class  FixedWingUAVDynamics(DynamicsBase):
         control_inputs = [delta_e, delta_a, delta_r, delta_t]
         
         return x, control_inputs
-    
-    def J(self, alpha, beta, phi, Va, gamma, turn_radius, config):
-        mass = config['params']['mass']
-        Jx = config['params']['Jx']
-        Jy = config['params']['Jy']
-        Jz = config['params']['Jz']
-        Jxz = config['params']['Jxz']
-        gamma_0 = Jx * Jz - Jxz**2
-        gamma_1 = (Jxz * (Jx - Jy + Jz))/gamma_0
-        gamma_2 = (Jz * (Jz - Jy) + Jxz**2)/gamma_0
-        gamma_3 = Jz/gamma_0
-        gamma_4 = Jxz/gamma_0
-        gamma_5 = (Jz - Jx)/Jy
-        gamma_6 = Jxz/Jy
-        gamma_7 = ((Jx - Jy)* Jx + Jxz**2)/gamma_0
-        gamma_8 = Jx/gamma_0
-        
-        trimmed_state, trimmed_control = self.compute_trimmed_states_inputs(Va, gamma, turn_radius, alpha, beta, phi)
-        forces, moments = self.partial_forces_and_moments(trimmed_state, trimmed_control)
-        fx = forces[0]
-        fy = forces[1]
-        fz = forces[2]
-        l = moments[0]
-        m = moments[1]
-        n = moments[2]
-
-        y = trimmed_state
-        u = y[3]
-        v = y[4]
-        w = y[5]                
-        phi = y[6]
-        theta = y[7]
-        p = y[9]
-        q = y[10]
-        r = y[11]        
-        cr = np.cos(phi)
-        sr = np.sin(phi)       
-        cp = np.cos(theta)
-        sp = np.sin(theta)
-        tp = np.tan(theta)
-        
-        f = np.zeros((12,), dtype = np.double)  
-        f[2] = -sp * u + sr * cp * v + cr * cp * w
-        f[3] = r * v - q * w + fx/mass
-        f[4] = p * w - r * u + fy/mass
-        f[5] = q * u - p * v + fz/mass
-        f[6] = p + sr * tp * q + cr * tp * r
-        f[7] = cr * q - sr * r
-        f[8] = sr/cp * q + cr/cp * r        
-        f[9] = gamma_1 * p * q - gamma_2 * q * r + gamma_3 * l + gamma_4 * n
-        f[10] = gamma_5 * p * r - gamma_6 * (p * p - r * r) + m/Jy
-        f[11] = gamma_7 * p * q - gamma_1 * q * r + gamma_4 * l + gamma_8 * n
-        
-        xdot = np.zeros((12,), dtype = np.double)
-        xdot[2] = -Va * np.sin(gamma)
-        xdot[8] = Va/turn_radius * np.cos(gamma)
-        J = np.linalg.norm(xdot[2:] - f[2:])**2
-        return J
             
     def trim(self, Va, gamma, turn_radius, max_iters=5000, epsilon=1e-8, kappa=1e-6):
         R = turn_radius
-        J = partial(self.J, Va = Va, gamma = gamma, turn_radius = R, config = self.config)
+        def J(alpha, beta, phi):        
+            trimmed_state, trimmed_control = self.compute_trimmed_states_inputs(Va, gamma, turn_radius, alpha, beta, phi)
+            f = self.f(trimmed_state, trimmed_control)
+            f[0] = 0.
+            f[1] = 0.
+            
+            xdot = np.zeros((12,), dtype = np.double)
+            xdot[2] = -Va * np.sin(gamma)
+            xdot[8] = Va/turn_radius * np.cos(gamma)
+            J = np.linalg.norm(xdot[2:] - f[2:])**2
+            return J
         def gradient_descent(alpha, beta, phi):
             iters = 0
             J0 = np.inf
