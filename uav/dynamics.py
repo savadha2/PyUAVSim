@@ -461,6 +461,66 @@ class  FixedWingUAVDynamics(DynamicsBase):
         
         return trimmed_state, trimmed_control
     
+    def f(self, y, control_input):
+        mass = self.config['params']['mass']
+        Jx = self.config['params']['Jx']
+        Jy = self.config['params']['Jy']
+        Jz = self.config['params']['Jz']
+        Jxz = self.config['params']['Jxz']
+        gamma_0 = Jx * Jz - Jxz**2
+        gamma_1 = (Jxz * (Jx - Jy + Jz))/gamma_0
+        gamma_2 = (Jz * (Jz - Jy) + Jxz**2)/gamma_0
+        gamma_3 = Jz/gamma_0
+        gamma_4 = Jxz/gamma_0
+        gamma_5 = (Jz - Jx)/Jy
+        gamma_6 = Jxz/Jy
+        gamma_7 = ((Jx - Jy)* Jx + Jxz**2)/gamma_0
+        gamma_8 = Jx/gamma_0
+                
+        #pn = y[0]
+        #pe = y[1]
+        #pd = y[2]
+        u = y[3]
+        v = y[4]
+        w = y[5]                
+        phi = y[6]
+        theta = y[7]
+        psi = y[8]
+        p = y[9]
+        q = y[10]
+        r = y[11]        
+        cr = np.cos(phi)
+        sr = np.sin(phi)
+        
+        cp = np.cos(theta)
+        sp = np.sin(theta)
+        tp = np.tan(theta)
+        
+        cy = np.cos(psi)
+        sy = np.sin(psi)
+        
+        forces, moments = self.partial_forces_and_moments(y, control_input)
+        fx = forces[0]
+        fy = forces[1]
+        fz = forces[2]
+        l = moments[0]
+        m = moments[1]
+        n = moments[2]
+        
+        dy = np.zeros((12,), dtype = np.double)  
+        dy[0] = cp * cy * u + (sr * sp * cy - cr * sy) * v + (cr * sp * cy + sr * sy) * w
+        dy[1] = cp * sy * u + (sr * sp * sy + cr * cy) * v + (cr * sp * sy - sr * cy) * w
+        dy[2] = -sp * u + sr * cp * v + cr * cp * w
+        dy[3] = r * v - q * w + fx/mass
+        dy[4] = p * w - r * u + fy/mass
+        dy[5] = q * u - p * v + fz/mass
+        dy[6] = p + sr * tp * q + cr * tp * r
+        dy[7] = cr * q - sr * r
+        dy[8] = sr/cp * q + cr/cp * r        
+        dy[9] = gamma_1 * p * q - gamma_2 * q * r + gamma_3 * l + gamma_4 * n
+        dy[10] = gamma_5 * p * r - gamma_6 * (p * p - r * r) + m/Jy
+        dy[11] = gamma_7 * p * q - gamma_1 * q * r + gamma_4 * l + gamma_8 * n
+        return dy
     @property
     def control_inputs(self):
         return self._control_inputs
