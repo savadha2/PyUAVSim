@@ -43,7 +43,7 @@ class  FixedWingUAVDynamics(DynamicsBase):
         self.t0 = t0
         self.set_integrator(FixedWingUAVDynamics.dynamics, 'dop853', jac = None, atol = 1e-6)        
         self.partial_forces_and_moments = partial(FixedWingUAVDynamics.forces_and_moments, config = self.config)
-        self._control_inputs = None
+        self._control_inputs = [0., 0., 0., 0.]
     @staticmethod
     def forces_and_moments(y, control_inputs, config):
         mass = config['params']['mass']
