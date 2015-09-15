@@ -17,9 +17,8 @@ class PIDController(object):
         self.differentiator= 0.
         self.error_d1 = 0.
     
-    @property
-    def input(self):
-        error = self.y_c - self.y
+    def compute_control_input(self, y_c, y):
+        error = y_c - y
         self.integrator += 0.5 * self.Ts * (error + self.error_d1)
         #band limited differentiator
         self.differentiator = (2*self.tau - self.Ts)/(2*self.tau - self.Ts) * self.differentiator \
