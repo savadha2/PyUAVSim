@@ -6,9 +6,7 @@ Created on Fri Sep 11 14:56:35 2015
 """
 import numpy as np
 class PIDController(object):
-    def __init__(self, y_c, y, kp, ki, kd, limit, Ts, tau):
-        self.y_c = y_c
-        self.y = y
+    def __init__(self, kp, ki, kd, limit, Ts, tau):
         self.kp = kp
         self.ki = ki
         self.kd = kd
