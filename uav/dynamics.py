@@ -402,7 +402,8 @@ class  FixedWingUAVDynamics(DynamicsBase):
                 beta = beta - kappa * dJ_dbeta
                 phi = phi - kappa * dJ_dphi
                 iters += 1
-                print 'J: %f at iteration %d' % (J0, iters)
+                if iters%100==0:
+                    print 'J: %f at iteration %d' % (J0, iters)
             return alpha, beta, phi
         alpha_0 = -0.0
         beta_0 = 0.
