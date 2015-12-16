@@ -15,11 +15,13 @@ class FixedWingUAV:
     tailwing_w = 7.5
     tailwing_l = 1.5
     
-    def __init__(self, x0, t0, dynamics_config_file, ax):
+    def __init__(self, dynamics_config_file, ax):
         self.vertices = np.matrix(np.zeros((16, 3), dtype = np.double))
 #        self.x = np.zeros((12,), dtype = np.double)
 #        self.x = x0
 #        self.t = t0
+        x0 = np.zeros((12,), dtype = np.double)
+        t0 = 0
         self.vertices[0, :] =  [self.fuse_l1, 0.0, 0.0]
         self.vertices[1, :] = [self.fuse_l2, 0.5*self.fuse_w, 0.5*self.fuse_h]
         self.vertices[2, :] = [self.fuse_l2, -0.5*self.fuse_w, 0.5*self.fuse_h]
