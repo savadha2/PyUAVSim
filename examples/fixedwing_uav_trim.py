@@ -14,8 +14,50 @@ uav.set_state(trimmed_state, 0.)
 uav.set_control_inputs(trimmed_control_inputs)
 t = uav.dynamics.t0
 pl.show()
-for m in range(2400):
+npoints = 2400
+v = np.zeros((2400,), dtype = np.double)
+gamma = np.zeros((2400,), dtype = np.double)
+x = np.zeros((2400,), dtype = np.double)
+y = np.zeros((2400,), dtype = np.double)
+z = np.zeros((2400,), dtype = np.double)
+t = np.zeros((2400,), dtype = np.double)
+
+for m in range(npoints):
     uav.update_state(dt = 1/200.)
+    v[m] = np.linalg.norm(uav.dynamics.x[3:6])
+    x[m] = uav.dynamics.x[0]
+    y[m] = uav.dynamics.x[1]
+    z[m] = uav.dynamics.x[2]
+    gamma[m] = np.arcsin(-uav.dynamics.x[5]/v[m])
+    t[m] = uav.dynamics.t
     if m%25==0:
         uav.update_view()
         pl.pause(.01)
+        
+        
+pl.figure(2)
+pl.subplot(221)
+pl.plot(y, x, 'r')
+pl.axis('equal')
+pl.xlabel('East (m)')
+pl.ylabel('North (m)')
+pl.grid('on')
+
+pl.subplot(222)
+pl.plot(t, -z, '.g')
+pl.grid
+pl.ylabel('Altitude (m)')
+pl.xlabel('time (seconds)')
+pl.grid('on')
+
+pl.subplot(223)
+pl.plot(t, v)
+pl.xlabel('time (seconds)')
+pl.ylabel('air speed (m/s)')
+pl.grid('on')
+
+pl.subplot(224)
+pl.plot(t, gamma * 180./np.pi)
+pl.xlabel('time (seconds)')
+pl.ylabel('gamma (deg)')
+pl.grid('on')
