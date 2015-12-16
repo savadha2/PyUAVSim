@@ -11,7 +11,7 @@ import numpy as np
 from functools import partial
 
 class DynamicsBase(object):
-    def __init__(self, x0, t0, dt_integration = 1e-3,):
+    def __init__(self, x0, t0, dt_integration = 1e-3):
         self.integrator = None
         self.dt = dt_integration
         self.x0 = x0
