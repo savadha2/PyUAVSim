@@ -5,7 +5,7 @@ Created on Fri Sep 11 14:56:35 2015
 @author: sharath
 """
 import numpy as np
-class PIDController(object):
+class PID(object):
     def __init__(self, kp, ki, kd, limit, Ts, tau):
         self.kp = kp
         self.ki = ki
