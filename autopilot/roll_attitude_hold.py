@@ -16,7 +16,7 @@ class RollAttitudeHold(PID):
         self.tau = 0
         super(RollAttitudeHold, self).__init__(self.kp, self.ki, self.kd, self.limit, Ts, self.tau)
     
-    def delta_a(self, phi_c, phi):
+    def compute_delta_a(self, phi_c, phi):
         return self.compute_control_input(phi_c, phi)
 
     
