@@ -8,8 +8,8 @@ import numpy as np
 import mpl_toolkits.mplot3d as a3
 import pylab as pl
 from uav.fixed_wing import FixedWingUAV#, FixedWingUAVDynamics
+from uav.autopilot import Autopilot
 from viewer.viewer import UAVViewer
-from autopilot.roll_attitude_hold import RollAttitudeHold
 
 class AppFixedWingRollAttHolder(FixedWingUAV):
     fuse_l1 = 5.
@@ -50,8 +50,9 @@ class AppFixedWingRollAttHolder(FixedWingUAV):
         self.tail = [[5, 14, 15]]
         self.faces = [self.nose, self.fuselage, self.wing, self.tail_wing, self.tail]
         self.viewer = UAVViewer(ax, (self.rotate(x0[6:9]) + x0[0:3]), self.faces, ['r', 'g', 'g', 'g', 'y'])
-        self.roll_attitude_holder = RollAttitudeHold([], 1./200.)
-        self.roll_attitude_holder.limit = 15. * np.pi/180.
+        self.autopilot = Autopilot([], 1./200.)
+        self.autopilot.delta_a_limit = 15. * np.pi/180.
+        self.autopilot.roll_hold_controller.limit = self.autopilot.delta_a_limit
         
     def update_view(self):
         vertices = self.rotate(self.dynamics.x[6:9]) + self.dynamics.x[0:3]
@@ -63,12 +64,13 @@ class AppFixedWingRollAttHolder(FixedWingUAV):
         self.set_control_inputs(trimmed_control_inputs)
     
     def set_roll(self, roll_c, kp, ki, kd, tau):
-        self.roll_attitude_holder.kp = kp
-        self.roll_attitude_holder.ki = ki
-        self.roll_attitude_holder.kd = kd
-        self.roll_attitude_holder.tau = tau
+        self.autopilot.roll_hold_controller.kp = kp
+        self.autopilot.roll_hold_controller.ki = ki
+        self.autopilot.roll_hold_controller.kd = kd
+        self.autopilot.roll_hold_controller.tau = tau
         control_inputs = self.get_control_inputs()
-        control_inputs[1] = self.roll_attitude_holder.compute_delta_a(roll_c, self.dynamics.x[6])
+        #-0.018949908534872429
+        control_inputs[1] = self.autopilot.compute_delta_a(roll_c, self.dynamics.x[6])
         self.set_control_inputs(control_inputs)
     
 ax = a3.Axes3D(pl.figure(1))
