@@ -50,8 +50,8 @@ class AppFixedWingUAVTrim(FixedWingUAV):
     
     def trim(self, Va, gamma, radius, max_iters):
         trimmed_state, trimmed_control_inputs = self.dynamics.trim(Va, gamma, radius, epsilon=1e-8, kappa=1e-6, max_iters=max_iters)
-        return trimmed_state, trimmed_control_inputs
-    
+        self.set_state(trimmed_state, 0.)
+        self.set_control_inputs(trimmed_control_inputs)
     
 ax = a3.Axes3D(pl.figure(1))
 ax.set_xlim3d(-20, 20)
@@ -60,9 +60,7 @@ ax.set_zlim3d(0, 40)
 initial_state = [0, 0, 0, 10., 0., 0.0, 0, 0 * np.pi/180, 0, 0, 0, 0.2]
 uav = AppFixedWingUAVTrim(initial_state, 0, '../configs/zagi.yaml', ax)
 t = uav.dynamics.t0
-trimmed_state, trimmed_control_inputs = uav.trim(10., 0., 50, 25000)
-uav.set_state(trimmed_state, 0.)
-uav.set_control_inputs(trimmed_control_inputs)
+uav.trim(10., 0., 50, 25000)
 
 npoints = 2400
 v = np.zeros((2400,), dtype = np.double)
