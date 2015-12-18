@@ -8,42 +8,96 @@ import numpy as np
 import mpl_toolkits.mplot3d as a3
 import pylab as pl
 from uav.fixed_wing import FixedWingUAV#, FixedWingUAVDynamics
+from viewer.viewer import UAVViewer
 from autopilot.roll_attitude_hold import RollAttitudeHold
 
+class AppFixedWingRollAttHolder(FixedWingUAV):
+    fuse_l1 = 5.
+    fuse_l2 = 2.5
+    fuse_l3 = 10.
+    fuse_h = 3.
+    fuse_w = 3.
+    wing_w = 15.
+    wing_l = 3.
+    tail_h = 4.
+    tailwing_w = 7.5
+    tailwing_l = 1.5
+    def __init__(self, x0, t0, config, ax):
+        super(AppFixedWingRollAttHolder, self).__init__(x0, t0, config)
+        self.vertices = np.matrix(np.zeros((16, 3), dtype = np.double))
+        self.vertices[0, :] =  [self.fuse_l1, 0.0, 0.0]
+        self.vertices[1, :] = [self.fuse_l2, 0.5*self.fuse_w, 0.5*self.fuse_h]
+        self.vertices[2, :] = [self.fuse_l2, -0.5*self.fuse_w, 0.5*self.fuse_h]
+        self.vertices[3, :] = [self.fuse_l2, -0.5*self.fuse_w, -0.5*self.fuse_h]
+        self.vertices[4, :] = [self.fuse_l2, 0.5*self.fuse_w, -0.5*self.fuse_h]
+        self.vertices[5, :] = [-self.fuse_l3, 0., 0.]
+        self.vertices[6, :] = [0, 0.5 * self.wing_w, 0.0]
+        self.vertices[7, :] = [-self.wing_l, 0.5 * self.wing_w, 0.0]
+        self.vertices[8, :] = [-self.wing_l, -0.5 * self.wing_w, 0.0]
+        self.vertices[9, :] = [0, -0.5 * self.wing_w, 0.0]
+        self.vertices[10, :] = [-(self.fuse_l3 - self.tailwing_l), 0.5 * self.tailwing_w, 0.]
+        self.vertices[11, :] = [-self.fuse_l3, 0.5 * self.tailwing_w, 0.]
+        self.vertices[12, :] = [-self.fuse_l3, -0.5 * self.tailwing_w, 0.]
+        self.vertices[13, :] = [-(self.fuse_l3 - self.tailwing_l), -0.5 * self.tailwing_w, 0.]
+        self.vertices[14, :] = [-(self.fuse_l3 - self.tailwing_l), 0.0, 0.]
+        self.vertices[15, :] = [-self.fuse_l3, 0.0, -self.tail_h]
+        self.vertices = 0.3048 * self.vertices
+        
+        self.nose = [[0, 1, 2], [0, 2, 3], [0, 3, 4], [0, 1, 4]]
+        self.fuselage = [[5, 3, 2], [5, 2, 1], [5, 3, 4], [5, 4, 1]]
+        self.wing = [[6, 7, 8, 9]]
+        self.tail_wing = [[10, 11, 12, 13]]
+        self.tail = [[5, 14, 15]]
+        self.faces = [self.nose, self.fuselage, self.wing, self.tail_wing, self.tail]
+        self.viewer = UAVViewer(ax, (self.rotate(x0[6:9]) + x0[0:3]), self.faces, ['r', 'g', 'g', 'g', 'y'])
+        self.roll_attitude_holder = RollAttitudeHold([], 1./200.)
+        self.roll_attitude_holder.limit = 15. * np.pi/180.
+        
+    def update_view(self):
+        vertices = self.rotate(self.dynamics.x[6:9]) + self.dynamics.x[0:3]
+        self.viewer.update(vertices)
+    
+    def trim(self, Va, gamma, radius, max_iters):
+        trimmed_state, trimmed_control_inputs = self.dynamics.trim(Va, gamma, radius, epsilon=1e-8, kappa=1e-6, max_iters=max_iters)
+        self.set_state(trimmed_state, 0.)
+        self.set_control_inputs(trimmed_control_inputs)
+    
+    def set_roll(self, roll_c, kp, ki, kd, tau):
+        self.roll_attitude_holder.kp = kp
+        self.roll_attitude_holder.ki = ki
+        self.roll_attitude_holder.kd = kd
+        self.roll_attitude_holder.tau = tau
+        control_inputs = self.get_control_inputs()
+        control_inputs[1] = self.roll_attitude_holder.compute_delta_a(roll_c, self.dynamics.x[6])
+        self.set_control_inputs(control_inputs)
+    
 ax = a3.Axes3D(pl.figure(1))
 ax.set_xlim3d(-20, 20)
 ax.set_ylim3d(-20, 20)
 ax.set_zlim3d(0, 40)
-uav = FixedWingUAV('../configs/zagi.yaml', ax)
-trimmed_state, trimmed_control_inputs = uav.dynamics.trim(10., 0.0, np.inf, epsilon=1e-8, kappa=1e-6, max_iters=5000)
-uav.set_state(trimmed_state, 0.)
-uav.set_control_inputs(trimmed_control_inputs)
-t = uav.dynamics.t0
-pl.show()
+initial_state = [0, 0, 0, 10., 0., 0.0, 0, 0 * np.pi/180, 0, 0, 0, 0.2]
+uav = AppFixedWingRollAttHolder(initial_state, 0, '../configs/zagi.yaml', ax)
+uav.trim(10., 0., np.inf, 5000)
+
 npoints = 2400
 v = np.zeros((2400,), dtype = np.double)
 gamma = np.zeros((2400,), dtype = np.double)
 x = np.zeros((2400,), dtype = np.double)
 y = np.zeros((2400,), dtype = np.double)
 z = np.zeros((2400,), dtype = np.double)
+t = np.zeros((2400,), dtype = np.double)
 roll = np.zeros((2400,), dtype = np.double)
 t = np.zeros((2400,), dtype = np.double)
 
 roll_command_history = np.zeros((2400,), dtype = np.double)
 roll_command = 10 * np.pi/180
-roll_attitude_holder = RollAttitudeHold([], 1./200.)
-roll_attitude_holder.kp = 6
-roll_attitude_holder.ki = 5
-roll_attitude_holder.kd = .6
-roll_attitude_holder.tau = .05
-roll_attitude_holder.limit = 15. * np.pi/180.
-control_inputs = trimmed_control_inputs
+
+pl.show()
 for m in range(npoints):
     if m%400 == 0:
         roll_command = roll_command * -1
     roll_command_history[m] = roll_command
-    control_inputs[1] = roll_attitude_holder.compute_control_input(roll_command, uav.dynamics.x[6])
-    uav.set_control_inputs(control_inputs)
+    uav.set_roll(roll_command, 6, 5, .6, .05)    
     uav.update_state(dt = 1/200.)
     v[m] = np.linalg.norm(uav.dynamics.x[3:6])
     x[m] = uav.dynamics.x[0]
@@ -54,8 +108,7 @@ for m in range(npoints):
     t[m] = uav.dynamics.t
     if m%25==0:
         uav.update_view()
-        pl.pause(.01)
-        
+        pl.pause(.01)   
         
 pl.figure(2)
 pl.subplot(221)
@@ -87,3 +140,6 @@ pl.grid('on')
 pl.figure(3)
 pl.plot(t, roll_command_history * 180/np.pi, '-r')
 pl.plot(t, roll * 180/np.pi, '.b')
+pl.xlabel('time (seconds)')
+pl.ylabel('roll (degrees)')
+pl.legend(['set point', 'actual'])
