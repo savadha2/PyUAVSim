@@ -79,7 +79,7 @@ ax.set_ylim3d(-20, 20)
 ax.set_zlim3d(0, 40)
 initial_state = [0, 0, 0, 10., 0., 0.0, 0, 0 * np.pi/180, 0, 0, 0, 0.2]
 uav = AppFixedWingRollAttHolder(initial_state, 0, '../configs/zagi.yaml', ax)
-uav.trim(10., 0., np.inf, 5000)
+uav.trim(10., 0., 50, 5000)
 
 npoints = 2400
 v = np.zeros((2400,), dtype = np.double)
@@ -92,12 +92,12 @@ roll = np.zeros((2400,), dtype = np.double)
 t = np.zeros((2400,), dtype = np.double)
 
 roll_command_history = np.zeros((2400,), dtype = np.double)
-roll_command = -10 * np.pi/180
+roll_command = 10 * np.pi/180
 
 pl.show()
 for m in range(npoints):
     if m%400 == 0:
-        roll_command = -roll_command 
+        roll_command = roll_command 
         print 'roll command: ', roll_command
     roll_command_history[m] = roll_command
     uav.set_roll(roll_command, 6, 5, .6, .05)    
