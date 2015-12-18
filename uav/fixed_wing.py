@@ -2,7 +2,7 @@ import numpy as np
 from dynamics import FixedWingUAVDynamics
 #import scipy as sp
 #import matplotlib.colors as colors    
-class FixedWingUAV:
+class FixedWingUAV(object):    
     def __init__(self, x0, t0, dynamics_config_file):        
         self.dynamics = FixedWingUAVDynamics(x0, t0, 0.001, dynamics_config_file)
     
