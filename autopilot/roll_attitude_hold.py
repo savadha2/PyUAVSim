@@ -9,10 +9,10 @@ import yaml
 
 class PID:
     def __init__(self, config, Ts):
-        self.kp_phi = 1
-        self.kd_phi = 0
-        self.ki_phi = 0
-        self.phi_limit = 0
+        self.kp = 1
+        self.kd = 0
+        self.ki = 0
+        self.limit = 0
         self.tau = 0
         self.roll_attitude_hold = pid_controller(self.kp_phi, self.ki_phi, self.kd, self.phi_limit, Ts, self.tau)
     
