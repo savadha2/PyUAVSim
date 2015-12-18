@@ -92,12 +92,13 @@ roll = np.zeros((2400,), dtype = np.double)
 t = np.zeros((2400,), dtype = np.double)
 
 roll_command_history = np.zeros((2400,), dtype = np.double)
-roll_command = 10 * np.pi/180
+roll_command = -10 * np.pi/180
 
 pl.show()
 for m in range(npoints):
     if m%400 == 0:
-        roll_command = roll_command * -1
+        roll_command = -roll_command 
+        print 'roll command: ', roll_command
     roll_command_history[m] = roll_command
     uav.set_roll(roll_command, 6, 5, .6, .05)    
     uav.update_state(dt = 1/200.)
