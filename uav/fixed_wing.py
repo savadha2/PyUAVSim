@@ -51,6 +51,9 @@ class FixedWingUAV(object):
     def set_control_inputs(self, control_inputs):
         self.dynamics.control_inputs = control_inputs
         
+    def get_control_inputs(self):
+        return self.dynamics.control_inputs
+        
 #    def __call__(self, t):
 #        self.dynamics.integrate(t)
 #        self.x = self.dynamics.integrator.y    
