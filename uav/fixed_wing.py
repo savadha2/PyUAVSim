@@ -3,13 +3,7 @@ from dynamics import FixedWingUAVDynamics
 #import scipy as sp
 #import matplotlib.colors as colors    
 class FixedWingUAV:
-    def __init__(self, dynamics_config_file, ax):
-        self.vertices = np.matrix(np.zeros((16, 3), dtype = np.double))
-#        self.x = np.zeros((12,), dtype = np.double)
-#        self.x = x0
-#        self.t = t0
-        x0 = np.zeros((12,), dtype = np.double)
-        t0 = 0
+    def __init__(self, x0, t0, dynamics_config_file):        
         self.dynamics = FixedWingUAVDynamics(x0, t0, 0.001, dynamics_config_file)
     
     def move_to(self, pos):
