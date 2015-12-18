@@ -25,7 +25,7 @@ class PID(object):
                                 + 2/(2 * self.tau + self.Ts) * (error - self.error_d1)
         self.error_d1 = error
         u_unsat = self.kp * error + self.ki * self.integrator + self.kd * self.differentiator
-        u = np.sign(u_unsat) * np.max([np.abs(u_unsat), self.limit])
+        u = np.sign(u_unsat) * np.min([np.abs(u_unsat), self.limit])
         #integrator anti wind up
         if self.ki!=0:
             self.integrator += self.Ts/self.ki * (u - u_unsat)
