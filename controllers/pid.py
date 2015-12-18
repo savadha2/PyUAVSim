@@ -18,11 +18,12 @@ class PID(object):
         self.error_d1 = 0.
     
     def compute_control_input(self, y_c, y):
-        error = y_c - y
+        error = y_c - y        
         self.integrator += 0.5 * self.Ts * (error + self.error_d1)
         #band limited differentiator
         self.differentiator = (2*self.tau - self.Ts)/(2*self.tau - self.Ts) * self.differentiator \
                                 + 2/(2 * self.tau + self.Ts) * (error - self.error_d1)
+        self.error_d1 = error
         u_unsat = self.kp * error + self.ki * self.integrator + self.kd * self.differentiator
         u = np.sign(u_unsat) * np.max([np.abs(u_unsat), self.limit])
         #integrator anti wind up
