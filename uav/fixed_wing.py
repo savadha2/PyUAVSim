@@ -1,10 +1,17 @@
 import numpy as np
 from dynamics import FixedWingUAVDynamics
+import yaml
+import errno
 #import scipy as sp
 #import matplotlib.colors as colors    
 class FixedWingUAV(object):    
-    def __init__(self, x0, t0, dynamics_config_file):        
-        self.dynamics = FixedWingUAVDynamics(x0, t0, 0.001, dynamics_config_file)
+    def __init__(self, x0, t0, dynamics_config_file):     
+        try:
+            with open(dynamics_config_file) as f:
+                self.attrs = yaml.load(f)
+        except:
+            raise IOError(errno.ENOENT, 'File not found', dynamics_config_file)
+        self.dynamics = FixedWingUAVDynamics(x0, t0, 0.001, self.attrs)
     
     def move_to(self, pos):
         self.x[0:3] = pos

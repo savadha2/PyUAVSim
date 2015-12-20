@@ -5,8 +5,6 @@ Created on Thu Aug  6 16:10:43 2015
 @author: sharath
 """
 from scipy.integrate import ode
-import yaml
-import errno
 import numpy as np
 from functools import partial
 
@@ -32,33 +30,28 @@ class DynamicsBase(object):
             self.t = self.integrator.t
 
 class  FixedWingUAVDynamics(DynamicsBase):
-    def __init__(self, x0, t0, dt_integration, config_file):
-        self.config = None
-        try:
-            with open(config_file) as f:
-                self.config = yaml.load(f)
-        except:
-            raise IOError(errno.ENOENT, 'File not found', config_file)
+    def __init__(self, x0, t0, dt_integration, attrs):
+        self.attrs = attrs
         super(FixedWingUAVDynamics, self).__init__(x0, t0, dt_integration)
         self.t0 = t0
         self.set_integrator(FixedWingUAVDynamics.dynamics, 'dop853', jac = None, rtol = 1e-8)        
-        self.partial_forces_and_moments = partial(FixedWingUAVDynamics.forces_and_moments, config = self.config)
+        self.partial_forces_and_moments = partial(FixedWingUAVDynamics.forces_and_moments, attrs = self.attrs)
         self._control_inputs = [0., 0., 0., 0.]
     @staticmethod
-    def forces_and_moments(y, control_inputs, config):
-        mass = config['params']['mass']
-        S = config['params']['S']
-        b = config['params']['b']
-        c = config['params']['c']
-        rho = config['params']['rho']
-        e = config['params']['e']
-        S_prop = config['params']['S_prop']
-        k_motor = config['params']['k_motor']
-        kT_p = config['params']['kT_p']
-        kOmega = config['params']['kOmega']
+    def forces_and_moments(y, control_inputs, attrs):
+        mass = attrs['params']['mass']
+        S = attrs['params']['S']
+        b = attrs['params']['b']
+        c = attrs['params']['c']
+        rho = attrs['params']['rho']
+        e = attrs['params']['e']
+        S_prop = attrs['params']['S_prop']
+        k_motor = attrs['params']['k_motor']
+        kT_p = attrs['params']['kT_p']
+        kOmega = attrs['params']['kOmega']
         
-        Clong_coeffs = config['longitudinal_coeffs']
-        Clateral_coeffs = config['lateral_coeffs']
+        Clong_coeffs = attrs['longitudinal_coeffs']
+        Clateral_coeffs = attrs['lateral_coeffs']
         
         #pn = y[0]
         #pe = y[1]
@@ -180,12 +173,12 @@ class  FixedWingUAVDynamics(DynamicsBase):
         return [fx, fy, fz], [l, m, n]
         
     @staticmethod
-    def dynamics(t, y, config, control_inputs, forces_and_moments):
-        mass = config['params']['mass']
-        Jx = config['params']['Jx']
-        Jy = config['params']['Jy']
-        Jz = config['params']['Jz']
-        Jxz = config['params']['Jxz']
+    def dynamics(t, y, attrs, control_inputs, forces_and_moments):
+        mass = attrs['params']['mass']
+        Jx = attrs['params']['Jx']
+        Jy = attrs['params']['Jy']
+        Jz = attrs['params']['Jz']
+        Jxz = attrs['params']['Jxz']
         gamma_0 = Jx * Jz - Jxz**2
         gamma_1 = (Jxz * (Jx - Jy + Jz))/gamma_0
         gamma_2 = (Jz * (Jz - Jy) + Jxz**2)/gamma_0
@@ -243,14 +236,14 @@ class  FixedWingUAVDynamics(DynamicsBase):
         return dy
     
     def compute_trimmed_states_inputs(self, Va, gamma, turn_radius, alpha, beta, phi):
-        config = self.config
+        attrs = self.attrs
         R = turn_radius
         g = 9.81
-        mass = config['params']['mass']
-        Jx = config['params']['Jx']
-        Jy = config['params']['Jy']
-        Jz = config['params']['Jz']
-        Jxz = config['params']['Jxz']
+        mass = attrs['params']['mass']
+        Jx = attrs['params']['Jx']
+        Jy = attrs['params']['Jy']
+        Jz = attrs['params']['Jz']
+        Jxz = attrs['params']['Jxz']
         gamma_0 = Jx * Jz - Jxz**2
         gamma_1 = (Jxz * (Jx - Jy + Jz))/gamma_0
         gamma_2 = (Jz * (Jz - Jy) + Jxz**2)/gamma_0
@@ -260,17 +253,17 @@ class  FixedWingUAVDynamics(DynamicsBase):
         #gamma_6 = Jxz/Jy
         gamma_7 = ((Jx - Jy)* Jx + Jxz**2)/gamma_0
         gamma_8 = Jx/gamma_0
-        S = config['params']['S']
-        b = config['params']['b']
-        c = config['params']['c']
-        rho = config['params']['rho']
-        e = config['params']['e']
-        S_prop = config['params']['S_prop']
-        k_motor = config['params']['k_motor']
-        #kT_p = config['params']['kT_p']
-        #kOmega = config['params']['kOmega']
-        Clong_coeffs = config['longitudinal_coeffs']
-        Clateral_coeffs = config['lateral_coeffs']
+        S = attrs['params']['S']
+        b = attrs['params']['b']
+        c = attrs['params']['c']
+        rho = attrs['params']['rho']
+        e = attrs['params']['e']
+        S_prop = attrs['params']['S_prop']
+        k_motor = attrs['params']['k_motor']
+        #kT_p = attrs['params']['kT_p']
+        #kOmega = attrs['params']['kOmega']
+        Clong_coeffs = attrs['longitudinal_coeffs']
+        Clateral_coeffs = attrs['lateral_coeffs']
         
         x = np.zeros((12,), dtype = np.double)    
         x[3] = Va * np.cos(alpha) * np.cos(beta)
@@ -415,11 +408,11 @@ class  FixedWingUAVDynamics(DynamicsBase):
         return trimmed_state, trimmed_control
     
     def f(self, y, control_input):
-        mass = self.config['params']['mass']
-        Jx = self.config['params']['Jx']
-        Jy = self.config['params']['Jy']
-        Jz = self.config['params']['Jz']
-        Jxz = self.config['params']['Jxz']
+        mass = self.attrs['params']['mass']
+        Jx = self.attrs['params']['Jx']
+        Jy = self.attrs['params']['Jy']
+        Jz = self.attrs['params']['Jz']
+        Jxz = self.attrs['params']['Jxz']
         gamma_0 = Jx * Jz - Jxz**2
         gamma_1 = (Jxz * (Jx - Jy + Jz))/gamma_0
         gamma_2 = (Jz * (Jz - Jy) + Jxz**2)/gamma_0
@@ -499,7 +492,7 @@ class  FixedWingUAVDynamics(DynamicsBase):
     @control_inputs.setter
     def control_inputs(self, inputs):
         self._control_inputs = inputs
-        self.integrator.set_f_params(self.config, self._control_inputs, self.partial_forces_and_moments)
+        self.integrator.set_f_params(self.attrs, self._control_inputs, self.partial_forces_and_moments)
         
         
             
