@@ -62,21 +62,16 @@ uav = AppFixedWingUAVTrim(initial_state, 0, '../configs/zagi.yaml', ax)
 uav.trim(10., 0., 50, 25000)
 
 npoints = 2400
-v = np.zeros((2400,), dtype = np.double)
+x = np.zeros((2400, 12), dtype = np.double)
 gamma = np.zeros((2400,), dtype = np.double)
-x = np.zeros((2400,), dtype = np.double)
-y = np.zeros((2400,), dtype = np.double)
-z = np.zeros((2400,), dtype = np.double)
 t = np.zeros((2400,), dtype = np.double)
 
 pl.show()
 for m in range(npoints):
     uav.update_state(dt = 1/200.)
-    v[m] = np.linalg.norm(uav.dynamics.x[3:6])
-    x[m] = uav.dynamics.x[0]
-    y[m] = uav.dynamics.x[1]
-    z[m] = uav.dynamics.x[2]
-    gamma[m] = np.arcsin(-uav.dynamics.x[5]/v[m])
+    v = np.linalg.norm(uav.dynamics.x[3:6])
+    x[m, 0:12] = uav.dynamics.x[0:12]
+    gamma[m] = np.arcsin(-uav.dynamics.x[5]/v)
     t[m] = uav.dynamics.t
     if m%25==0:
         uav.update_view()
@@ -85,13 +80,16 @@ for m in range(npoints):
         
 pl.figure(2)
 pl.subplot(221)
-pl.plot(y, x, 'r')
+east = x[:, 1]
+north = x[:, 0]
+pl.plot(east, north, 'r')
 pl.axis('equal')
 pl.xlabel('East (m)')
 pl.ylabel('North (m)')
 pl.grid('on')
 
 pl.subplot(222)
+z = x[:, 2]
 pl.plot(t, -z, '.g')
 pl.grid
 pl.ylabel('Altitude (m)')
@@ -99,6 +97,7 @@ pl.xlabel('time (seconds)')
 pl.grid('on')
 
 pl.subplot(223)
+v = np.linalg.norm(x[:, 3:6], axis=1)
 pl.plot(t, v)
 pl.xlabel('time (seconds)')
 pl.ylabel('air speed (m/s)')
@@ -109,3 +108,19 @@ pl.plot(t, gamma * 180./np.pi)
 pl.xlabel('time (seconds)')
 pl.ylabel('gamma (deg)')
 pl.grid('on')
+
+pl.figure(3)
+pl.subplot(131)
+pl.plot(t, x[:, 6] * 180./np.pi)
+pl.ylabel('roll (deg)')
+pl.xlabel('time (secs)')
+
+pl.subplot(132)
+pl.plot(t, x[:, 7] * 180./np.pi)
+pl.ylabel('pitch (deg)')
+pl.xlabel('time (secs)')
+
+pl.subplot(133)
+pl.plot(t, x[:, 8] * 180./np.pi)
+pl.ylabel('yaw (deg)')
+pl.xlabel('time (secs)')
