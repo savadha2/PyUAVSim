@@ -64,6 +64,8 @@ class AppFixedWingRollAttHolder(FixedWingUAV):
         self.set_control_inputs(trimmed_control_inputs)
     
     def set_roll(self, roll_c, kp, ki, kd, tau):
+        aphi_1 = -0.5 * rho * Va * S * b * Cp_p * 0.5 * b
+        aphi_2 = 0.5 * rho *  Va**2 * S * b * Cp_delta_a
         self.autopilot.roll_hold_controller.kp = kp
         self.autopilot.roll_hold_controller.ki = ki
         self.autopilot.roll_hold_controller.kd = kd
