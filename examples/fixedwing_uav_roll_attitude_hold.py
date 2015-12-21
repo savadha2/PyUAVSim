@@ -63,12 +63,31 @@ class AppFixedWingRollAttHolder(FixedWingUAV):
         self.set_state(trimmed_state, 0.)
         self.set_control_inputs(trimmed_control_inputs)
     
-    def set_roll(self, roll_c, kp, ki, kd, tau):
+    #TODO: move ki, tau, zeta to config if required
+    def set_roll(self, roll_c, ki, tau, zeta):
+        Va = np.linalg.norm(self.dynamics.x[3:6])
+        S = self.attrs['params']['S']
+        b = self.attrs['params']['b']
+        rho = self.attrs['params']['rho']
+        Jx = self.attrs['params']['Jx']
+        Jz = self.attrs['params']['Jz']
+        Jxz = self.attrs['params']['Jxz']
+        gamma_0 = Jx * Jz - Jxz**2
+        gamma_3 = Jz/gamma_0
+        gamma_4 = Jxz/gamma_0
+        Clateral_coeffs = self.attrs['lateral_coeffs']
+        Cl_p = Clateral_coeffs['Cl_p']
+        Cl_delta_a = Clateral_coeffs['Cl_delta_a']
+        Cn_delta_a = Clateral_coeffs['Cn_delta_a']
+        Cn_p = Clateral_coeffs['Cn_p']
+        Cp_delta_a = gamma_3 * Cl_delta_a + gamma_4 * Cn_delta_a
+        Cp_p = gamma_3 * Cl_p + gamma_4 * Cn_p
         aphi_1 = -0.5 * rho * Va * S * b * Cp_p * 0.5 * b
         aphi_2 = 0.5 * rho *  Va**2 * S * b * Cp_delta_a
-        self.autopilot.roll_hold_controller.kp = kp
+        self.autopilot.roll_hold_controller.kp = self.attrs['autopilot']['delta_a_max_deg']/self.attrs['autopilot']['error_phi_max_deg'] * np.sign(aphi_2)
         self.autopilot.roll_hold_controller.ki = ki
-        self.autopilot.roll_hold_controller.kd = kd
+        omega_phi = np.sqrt(np.abs(aphi_2) * self.attrs['autopilot']['delta_a_max_deg']/self.attrs['autopilot']['error_phi_max_deg'])
+        self.autopilot.roll_hold_controller.kd = (2 * zeta * omega_phi - aphi_1)/aphi_2
         self.autopilot.roll_hold_controller.tau = tau
         control_inputs = self.get_control_inputs()
         #-0.018949908534872429
@@ -102,7 +121,7 @@ for m in range(npoints):
         roll_command = roll_command 
         print 'roll command: ', roll_command
     roll_command_history[m] = roll_command
-    uav.set_roll(roll_command, 6, 5, .6, .05)    
+    uav.set_roll(roll_command, 5, .05, 1.5)    
     uav.update_state(dt = 1/200.)
     v[m] = np.linalg.norm(uav.dynamics.x[3:6])
     x[m] = uav.dynamics.x[0]
