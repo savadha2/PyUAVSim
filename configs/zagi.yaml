@@ -52,3 +52,9 @@ lateral_coeffs:
   CY_delta_r: 0
   Cl_delta_r: 0.
   Cn_delta_r: 0.
+
+autopilot:
+  delta_a_max_deg: 45
+  phi_max_deg: 15
+  delta_e_max_deg: 45
+  pitch_max_deg: 10
