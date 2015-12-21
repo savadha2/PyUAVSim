@@ -5,7 +5,8 @@ import errno
 #import scipy as sp
 #import matplotlib.colors as colors    
 class FixedWingUAV(object):    
-    def __init__(self, x0, t0, dynamics_config_file):     
+    def __init__(self, x0, t0, dynamics_config_file):
+        self.attrs = None
         try:
             with open(dynamics_config_file) as f:
                 self.attrs = yaml.load(f)
