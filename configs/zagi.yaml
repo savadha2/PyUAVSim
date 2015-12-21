@@ -55,6 +55,6 @@ lateral_coeffs:
 
 autopilot:
   delta_a_max_deg: 45
-  phi_max_deg: 15
+  error_phi_max_deg: 15
   delta_e_max_deg: 45
-  pitch_max_deg: 10
+  error_pitch_max_deg: 10
