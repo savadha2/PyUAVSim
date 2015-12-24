@@ -62,9 +62,9 @@ uav = AppFixedWingUAVTrim(initial_state, 0, '../configs/aerosonde.yaml', ax)
 uav.trim(35., 0., 100, 25000)
 
 npoints = 2400
-x = np.zeros((2400, 12), dtype = np.double)
-gamma = np.zeros((2400,), dtype = np.double)
-t = np.zeros((2400,), dtype = np.double)
+x = np.zeros((npoints, 12), dtype = np.double)
+gamma = np.zeros((npoints,), dtype = np.double)
+t = np.zeros((npoints,), dtype = np.double)
 
 pl.show()
 for m in range(npoints):

@@ -116,12 +116,12 @@ uav = AppFixedWingRollAttHolder(initial_state, 0, '../configs/aerosonde.yaml', a
 uav.trim(35., 0., np.inf, 5000)
 
 npoints = 2400
-x = np.zeros((2400, 12), dtype = np.double)
-gamma = np.zeros((2400,), dtype = np.double)
-chi = np.zeros((2400,), dtype = np.double)
-t = np.zeros((2400,), dtype = np.double)
+x = np.zeros((npoints, 12), dtype = np.double)
+gamma = np.zeros((npoints,), dtype = np.double)
+chi = np.zeros((npoints,), dtype = np.double)
+t = np.zeros((npoints,), dtype = np.double)
 
-chi_command_history = np.zeros((2400,), dtype = np.double)
+chi_command_history = np.zeros((npoints,), dtype = np.double)
 chi_command = 10 * np.pi/180
 roll_c = 0
 pl.show()
