@@ -57,9 +57,9 @@ ax = a3.Axes3D(pl.figure(1))
 ax.set_xlim3d(-20, 20)
 ax.set_ylim3d(-20, 20)
 ax.set_zlim3d(0, 40)
-initial_state = [0, 0, 0, 10., 0., 0.0, 0, 0 * np.pi/180, 0, 0, 0, 0.2]
-uav = AppFixedWingUAVTrim(initial_state, 0, '../configs/zagi.yaml', ax)
-uav.trim(10., 0., 50, 25000)
+initial_state = [0, 0, 0, 35., 0., 0.0, 0, 0 * np.pi/180, 0, 0, 0, 0.2]
+uav = AppFixedWingUAVTrim(initial_state, 0, '../configs/aerosonde.yaml', ax)
+uav.trim(35., 0., 100, 25000)
 
 npoints = 2400
 x = np.zeros((2400, 12), dtype = np.double)

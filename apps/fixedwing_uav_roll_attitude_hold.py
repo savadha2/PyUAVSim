@@ -60,7 +60,7 @@ class AppFixedWingRollAttHolder(FixedWingUAV):
     
     def trim(self, Va, gamma, radius, max_iters):
         trimmed_state, trimmed_control_inputs = self.dynamics.trim(Va, gamma, radius, epsilon=1e-8, kappa=1e-6, max_iters=max_iters)
-        self.set_state(trimmed_state, 0.)
+        #self.set_state(trimmed_state, 0.)
         self.set_control_inputs(trimmed_control_inputs)
     
     #TODO: move ki, tau, zeta to config if required
@@ -98,9 +98,9 @@ ax = a3.Axes3D(pl.figure(1))
 ax.set_xlim3d(-20, 20)
 ax.set_ylim3d(-20, 20)
 ax.set_zlim3d(0, 40)
-initial_state = [0, 0, 0, 10., 0., 0.0, 0, 0 * np.pi/180, 0, 0, 0, 0.2]
-uav = AppFixedWingRollAttHolder(initial_state, 0, '../configs/zagi.yaml', ax)
-uav.trim(10., 0., 50, 5000)
+initial_state = [0, 0, 0, 35., 0., 0.0, 0, 0 * np.pi/180, 0, 0, 0, 0.2]
+uav = AppFixedWingRollAttHolder(initial_state, 0, '../configs/aerosonde.yaml', ax)
+uav.trim(35., 0., np.inf, 5000)
 
 npoints = 2400
 x = np.zeros((2400, 12), dtype = np.double)
@@ -108,12 +108,12 @@ gamma = np.zeros((2400,), dtype = np.double)
 t = np.zeros((2400,), dtype = np.double)
 
 roll_command_history = np.zeros((2400,), dtype = np.double)
-roll_command = 10 * np.pi/180
+roll_command = 5 * np.pi/180
 
 pl.show()
 for m in range(npoints):
     if m%400 == 0:
-        roll_command = roll_command 
+        roll_command = -roll_command 
         print 'roll command: ', roll_command
     roll_command_history[m] = roll_command
     uav.set_roll(roll_command, 5, .05, 1.5)    
