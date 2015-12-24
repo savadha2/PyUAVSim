@@ -18,7 +18,7 @@ class Autopilot:
         
         self.kp_chi = 0
         self.ki_chi = 0
-        self.heading_hold_controller = PID(self.kp_chi, self.ki_chi, 0, np.inf, Ts * 10., 0)
+        self.heading_hold_controller = PID(self.kp_chi, self.ki_chi, 0, np.inf, Ts * 4.0, 0)
     
     def compute_delta_a(self, phi_c, phi, *args):
         return self.roll_hold_controller.compute_control_input(phi_c, phi, *args)
