@@ -57,4 +57,5 @@ autopilot:
   delta_a_max_deg: 45
   error_phi_max_deg: 15
   delta_e_max_deg: 45
-  error_pitch_max_deg: 10
+  error_theta_max_deg: 10
+  
