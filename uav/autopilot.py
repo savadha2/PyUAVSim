@@ -13,17 +13,25 @@ class Autopilot:
         self.kd_phi = 0
         self.ki_phi = 0
         self.delta_a_limit = np.inf
+        self.delta_e_limit = np.inf
         self.kd_phi_tau = 0
         self.roll_hold_controller = PID(self.kp_phi, self.ki_phi, self.kd_phi, self.delta_a_limit, Ts, self.kd_phi_tau)
         
         self.kp_chi = 0
         self.ki_chi = 0
         self.heading_hold_controller = PID(self.kp_chi, self.ki_chi, 0, np.inf, Ts * 4.0, 0)
+        
+        self.kp_theta = 0
+        self.ki_theta = 0
+        self.pitch_hold_controller = PID(self.kp_theta, self.ki_theta, 0, np.inf, Ts, self.delta_e_limit)
     
     def compute_delta_a(self, phi_c, phi, *args):
         return self.roll_hold_controller.compute_control_input(phi_c, phi, *args)
     
     def compute_roll(self, chi_c, chi):
         return self.heading_hold_controller.compute_control_input(chi_c, chi)
+        
+    def compute_delta_e(self, theta_c, theta, *args):
+        return self.pitch_hold_controller.compute_control_input(theta_c, theta, *args)
 
     
