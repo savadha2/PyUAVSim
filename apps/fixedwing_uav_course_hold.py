@@ -67,9 +67,9 @@ class AppFixedWingRollAttHolder(FixedWingUAV):
     #TODO: vg = va (no wind is assumed. Add wind models and change appropriately later!)
     def set_heading(self, chi_c):
         Va = np.linalg.norm(self.dynamics.x[3:6])
-        omega_chi = 0.5
+        omega_chi = 0.1
         Vg = Va
-        self.autopilot.heading_hold_controller.kp = 2 * 1.5 * omega_chi * Vg/9.81
+        self.autopilot.heading_hold_controller.kp = 2 * 3.0 * omega_chi * Vg/9.81
         self.autopilot.heading_hold_controller.ki = omega_chi**2 * Vg/9.81
         chi = self.dynamics.x[8]
         roll_c = self.autopilot.compute_roll(chi_c, chi)
@@ -129,7 +129,7 @@ for m in range(npoints):
     if m%400 == 0:
         chi_command = chi_command 
         print 'chi command: ', chi_command
-    if m%50 == 0:
+    if m%1 == 0:
         roll_c = uav.set_heading(chi_command)
     velocity_inertial = np.asarray(uav.dynamics.x[3:6]) * uav.R_bv(uav.dynamics.x[6:9])
     chi[m] = uav.dynamics.x[8]#np.arctan2(velocity_inertial[0, 1], velocity_inertial[0, 0])
