@@ -77,7 +77,7 @@ class AppFixedWingRollAttHolder(FixedWingUAV):
         Cm_delta_e = Clong_coeffs['Cm_delta_e']
         atheta_2 =  -rho * Va**2 * c *S * Cm_alpha * 0.5/Jy
         atheta_3 = rho * Va**2 * c *S * Cm_delta_e * 0.5/Jy
-        omega_h = 0.25
+        omega_h = 0.1
         kp_theta = self.attrs['autopilot']['delta_e_max_deg']/self.attrs['autopilot']['error_theta_max_deg'] * np.sign(atheta_3)
         K_theta_dc = (kp_theta * atheta_3)/(atheta_2 + kp_theta * atheta_3)
         self.autopilot.altitude_hold_controller.kp = 2.0 * zeta * omega_h/(K_theta_dc * Va)
@@ -104,12 +104,13 @@ class AppFixedWingRollAttHolder(FixedWingUAV):
         self.autopilot.pitch_hold_controller.kp = self.attrs['autopilot']['delta_e_max_deg']/self.attrs['autopilot']['error_theta_max_deg'] * np.sign(atheta_3)
         self.autopilot.pitch_hold_controller.ki = ki
         omega_theta = np.sqrt(atheta_2 + self.attrs['autopilot']['delta_e_max_deg']/self.attrs['autopilot']['error_theta_max_deg'] * np.abs(atheta_3))
+        print 'omega_theta: ', omega_theta
         self.autopilot.pitch_hold_controller.kd = (2 * zeta * omega_theta - atheta_1)/atheta_3
         self.autopilot.pitch_hold_controller.tau = tau
         control_inputs = self.get_control_inputs()
         #-0.018949908534872429
         q = self.dynamics.x[10]
-        control_inputs[0] = self.autopilot.compute_delta_e(pitch_c, self.dynamics.x[7], -q)
+        control_inputs[0] = self.autopilot.compute_delta_e(pitch_c, self.dynamics.x[7])
         self.set_control_inputs(control_inputs)
     
 ax = a3.Axes3D(pl.figure(1))
@@ -126,15 +127,15 @@ gamma = np.zeros((npoints,), dtype = np.double)
 t = np.zeros((npoints,), dtype = np.double)
 
 altitude_command_history = np.zeros((npoints,), dtype = np.double)
-altitude_command =  10
+altitude_command =  -10
 pitch_command = 0
 pl.show()
 for m in range(npoints):
-    if m%400 == 0:
-        altitude_command = altitude_command 
+    if m%1000 == 0:
+        altitude_command = -altitude_command 
         print 'altitude command: ', altitude_command
-    if m%40 == 0:
-        pitch_command = uav.set_altitude(altitude_command, .707)
+    if m%1 == 0:
+        pitch_command = uav.set_altitude(altitude_command, 1.5)
     altitude_command_history[m] = altitude_command
     uav.set_pitch(pitch_command, 0, .05, 0.7)    
     uav.update_state(dt = 1/200.)
@@ -179,7 +180,7 @@ pl.ylabel('gamma (deg)')
 pl.grid('on')
 
 pl.figure(3)
-altitude = x[:, 2]
+altitude = -x[:, 2]
 pl.plot(t, altitude_command_history, '-r')
 pl.plot(t, altitude, '.b')
 pl.xlabel('time (seconds)')
