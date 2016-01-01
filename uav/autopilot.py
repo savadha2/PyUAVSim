@@ -27,7 +27,7 @@ class Autopilot:
         
         self.kp_h = 1
         self.ki_h = 0
-        self.altitude_hold_controller = PID(self.kp_h, self.ki_h, 0, np.inf, Ts * 4.0, 0)
+        self.altitude_hold_controller = PID(self.kp_h, self.ki_h, 0, np.inf, Ts * 1.0, 0)
     
     def compute_delta_a(self, phi_c, phi, *args):
         return self.roll_hold_controller.compute_control_input(phi_c, phi, *args)
