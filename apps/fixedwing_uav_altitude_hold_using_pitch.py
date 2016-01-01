@@ -82,7 +82,7 @@ class AppFixedWingRollAttHolder(FixedWingUAV):
         K_theta_dc = (kp_theta * atheta_3)/(atheta_2 + kp_theta * atheta_3)
         self.autopilot.altitude_hold_controller.kp = 2.0 * zeta * omega_h/(K_theta_dc * Va)
         self.autopilot.heading_hold_controller.ki = omega_h**2 /(K_theta_dc * Va)
-        h = self.dynamics.x[2]
+        h = -self.dynamics.x[2]
         pitch_c = self.autopilot.compute_pitch(h_c, h)
         return pitch_c
         
