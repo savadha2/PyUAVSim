@@ -19,7 +19,7 @@ class Autopilot:
         
         self.kp_chi = 0
         self.ki_chi = 0
-        self.heading_hold_controller = PID(self.kp_chi, self.ki_chi, 0, np.inf, Ts * 4.0, 0)
+        self.heading_hold_controller = PID(self.kp_chi, self.ki_chi, 0, np.inf, Ts * 1.0, 0)
         
         self.kp_theta = 0
         self.ki_theta = 0
