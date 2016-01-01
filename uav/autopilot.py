@@ -23,7 +23,11 @@ class Autopilot:
         
         self.kp_theta = 0
         self.ki_theta = 0
-        self.pitch_hold_controller = PID(self.kp_theta, self.ki_theta, 0, np.inf, Ts, self.delta_e_limit)
+        self.pitch_hold_controller = PID(self.kp_theta, self.ki_theta, 0, self.delta_e_limit, Ts, 0)
+        
+        self.kp_h = 1
+        self.ki_h = 0
+        self.altitude_hold_controller = PID(self.kp_h, self.ki_h, 0, np.inf, Ts * 4.0, 0)
     
     def compute_delta_a(self, phi_c, phi, *args):
         return self.roll_hold_controller.compute_control_input(phi_c, phi, *args)
@@ -33,5 +37,8 @@ class Autopilot:
         
     def compute_delta_e(self, theta_c, theta, *args):
         return self.pitch_hold_controller.compute_control_input(theta_c, theta, *args)
+        
+    def compute_pitch(self, h_c, h, *args):
+        return self.altitude_hold_controller.compute_control_input(h_c, h, *args)
 
     
