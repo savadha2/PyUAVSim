@@ -11,7 +11,7 @@ from uav.fixed_wing import FixedWingUAV#, FixedWingUAVDynamics
 from uav.autopilot import Autopilot
 from viewer.viewer import UAVViewer
 
-class AppFixedWingRollAttHolder(FixedWingUAV):
+class AppFixedWingCourseHolder(FixedWingUAV):
     fuse_l1 = 5.
     fuse_l2 = 2.5
     fuse_l3 = 10.
@@ -23,7 +23,7 @@ class AppFixedWingRollAttHolder(FixedWingUAV):
     tailwing_w = 7.5
     tailwing_l = 1.5
     def __init__(self, x0, t0, config, ax):
-        super(AppFixedWingRollAttHolder, self).__init__(x0, t0, config)
+        super(AppFixedWingCourseHolder, self).__init__(x0, t0, config)
         self.vertices = np.matrix(np.zeros((16, 3), dtype = np.double))
         self.vertices[0, :] =  [self.fuse_l1, 0.0, 0.0]
         self.vertices[1, :] = [self.fuse_l2, 0.5*self.fuse_w, 0.5*self.fuse_h]
@@ -112,7 +112,7 @@ ax.set_xlim3d(-20, 20)
 ax.set_ylim3d(-20, 20)
 ax.set_zlim3d(0, 40)
 initial_state = [0, 0, 0, 35., 0., 0.0, 0, 0 * np.pi/180, 5 * np.pi/180., 0, 0, 0.0]
-uav = AppFixedWingRollAttHolder(initial_state, 0, '../configs/aerosonde.yaml', ax)
+uav = AppFixedWingCourseHolder(initial_state, 0, '../configs/aerosonde.yaml', ax)
 uav.trim(35., 0., np.inf, 5000)
 
 npoints = 2400
