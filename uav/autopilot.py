@@ -32,6 +32,10 @@ class Autopilot:
         self.kp_v1 = 1
         self.ki_v1 = 0
         self.airspeed_hold_with_pitch_controller = PID(self.kp_v1, self.ki_v1, 0, np.inf, Ts, 0)
+        
+        self.kp_v = 1
+        self.ki_v = 0
+        self.airspeed_hold_with_throttle_controller = PID(self.kp_v, self.ki_v, 0, np.inf, Ts, 0)
     
     def compute_delta_a(self, phi_c, phi, *args):
         return self.roll_hold_controller.compute_control_input(phi_c, phi, *args)
@@ -47,6 +51,9 @@ class Autopilot:
         
     def compute_pitch_for_airspeed(self, Va_c, Va, *args):
         return self.airspeed_hold_with_pitch_controller.compute_control_input(Va_c, Va, *args)
+        
+    def compute_throttle_for_airspeed(self, Va_c, Va, *args):
+        return self.airspeed_hold_with_throttle_controller.compute_control_input(Va_c, Va, *args)
 
 
     
