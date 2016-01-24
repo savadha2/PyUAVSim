@@ -41,10 +41,6 @@ class FixedWingUAV(object):
         roll = rpy_rad[0]
         R = self.R_bv2(roll) * self.R_v2v1(pitch) * self.R_v1v(yaw)
         return R
-
-    def rotate(self, ypr_rad):
-        vertices = self.vertices * self.R_bv(ypr_rad)
-        return vertices
     
     def update_state(self, dt):
          if self.dynamics.control_inputs is not None:
