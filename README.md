@@ -1,5 +1,5 @@
 # PyUAVSim
-Light weight Python simulator for small UAVs that will support design and development of UAS (from autopilot tuning to path planning)
+Light weight Python simulator for small UAVs
 Work in progress (development is slow since I am doing this part time as hobby)
 
 Next set of features:
