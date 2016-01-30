@@ -42,7 +42,8 @@ class Viewer(object):
     def update(self, vertices):
         vertices = np.array(vertices * self.R_nedtoplot.T)
         for k, assembly in enumerate(self.assemblies):
-            self.update_assembly(vertices, assembly, self.faces[k])    def rotate(self, R_ned):
+            self.update_assembly(vertices, assembly, self.faces[k])
+            
     def rotate(self, R_ned):
         vertices = self.vertices * R_ned
         return vertices
