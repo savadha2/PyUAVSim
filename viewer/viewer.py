@@ -7,7 +7,7 @@ Created on Thu Aug  6 15:57:56 2015
 import mpl_toolkits.mplot3d as a3
 import numpy as np
 
-class UAVViewer:
+class Viewer(object):
     R_nedtoplot = np.matrix(([0, 1, 0], [1, 0, 0], [0, 0, -1]), dtype = np.double)
     def __init__(self, ax, vertices, faces, colors):
         vertices = np.array(vertices * self.R_nedtoplot.T)
