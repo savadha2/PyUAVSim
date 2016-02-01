@@ -54,5 +54,5 @@ class AppFixedWingUAVTrim(FixedWingUAV):
     
     def trim(self, Va, gamma, radius, max_iters):
         trimmed_state, trimmed_control_inputs = self.dynamics.trim(Va, gamma, radius, epsilon=1e-8, kappa=1e-6, max_iters=max_iters)
-        self.set_state(trimmed_state, 0.)
+        #self.set_state(trimmed_state, 0.)
         self.set_control_inputs(trimmed_control_inputs)
