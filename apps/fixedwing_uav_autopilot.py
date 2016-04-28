@@ -222,3 +222,14 @@ class AppFixedWingUAVAutopilot(FixedWingUAV):
         q = self.dynamics.x[10]
         control_inputs[0] = self.autopilot.compute_delta_e(pitch_c, self.dynamics.x[7])
         self.set_control_inputs(control_inputs)
+        
+    def __call__(self, Va_c, chi_c, h_c, trimmed_state, trimmed_control):
+        self.set_heading(chi_c)
+        self.set_altitude_with_pitch(h_c)
+        zeta = 0.5
+        delta_e_trim = trimmed_control[0]
+        delta_t_trim = trimmed_control[3]
+        Va_trim = np.linalg.norm(trimmed_state[0:3])
+        alpha_trim = np.arctan(trimmed_state[5]/trimmed_state[3])
+        self.set_airspeed_with_throttle(Va_c, zeta, Va_trim, delta_e_trim, alpha_trim, delta_t_trim)
+        self.set_airspeed_with_pitch(Va_c, zeta, Va_trim, delta_e_trim, alpha_trim)
