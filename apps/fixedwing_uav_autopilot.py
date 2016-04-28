@@ -94,7 +94,7 @@ class AppFixedWingUAVAutopilot(FixedWingUAV):
         roll_c = self.autopilot.compute_roll(chi_c, chi)
         return roll_c
         
-    def set_roll(self, roll_c, ki, tau, zeta):
+    def set_roll(self, roll_c, ki = 5, tau = 0.05, zeta = 1.5):
         Va = np.linalg.norm(self.dynamics.x[3:6])
         
         S = self.attrs['params']['S']
@@ -126,7 +126,7 @@ class AppFixedWingUAVAutopilot(FixedWingUAV):
         control_inputs[1] = self.autopilot.compute_delta_a(roll_c, self.dynamics.x[6])
         self.set_control_inputs(control_inputs)        
     
-    def set_airspeed_with_throttle(self, Va_c, zeta, Va_trim, delta_e_trim, alpha_trim, delta_t_trim):
+    def set_airspeed_with_throttle(self, Va_c, Va_trim, delta_e_trim, alpha_trim, delta_t_trim, zeta = 0.5):
         Va = np.linalg.norm(self.dynamics.x[3:6])
         S = self.attrs['params']['S']
         rho = self.attrs['params']['rho']
@@ -150,7 +150,7 @@ class AppFixedWingUAVAutopilot(FixedWingUAV):
         control_inputs[3] = delta_delta_t + control_inputs[3]
         self.set_control_inputs(control_inputs)
         
-    def set_altitude_with_pitch(self, h_c, zeta):
+    def set_altitude_with_pitch(self, h_c, zeta = 0.707):
         Va = np.linalg.norm(self.dynamics.x[3:6])
         S = self.attrs['params']['S']
         #b = self.attrs['params']['b']
@@ -171,7 +171,7 @@ class AppFixedWingUAVAutopilot(FixedWingUAV):
         pitch_c = self.autopilot.compute_pitch(h_c, h)
         return pitch_c
         
-    def set_airspeed_with_pitch(self, Va_c, zeta, Va_trim, delta_e_trim, alpha_trim):
+    def set_airspeed_with_pitch(self, Va_c, Va_trim, delta_e_trim, alpha_trim, zeta = 1.5):
         Va = np.linalg.norm(self.dynamics.x[3:6])
         S = self.attrs['params']['S']
         #b = self.attrs['params']['b']
@@ -199,7 +199,7 @@ class AppFixedWingUAVAutopilot(FixedWingUAV):
         return pitch_c
         
     #TODO: move ki, tau, zeta to config if required
-    def set_pitch(self, pitch_c, ki, tau, zeta):
+    def set_pitch(self, pitch_c, ki = 0, tau = 0.05, zeta = 0.7):
         Va = np.linalg.norm(self.dynamics.x[3:6])
         S = self.attrs['params']['S']
         #b = self.attrs['params']['b']
