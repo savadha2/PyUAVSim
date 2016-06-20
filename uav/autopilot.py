@@ -6,8 +6,10 @@ Created on Wed Dec 16 14:40:46 2015
 """
 from controllers.pid import PID
 import numpy as np
+from abc import ABCMeta, abstractmethod
 
-class Autopilot:
+class Autopilot(object):
+    __metaclass__ = ABCMeta
     def __init__(self, attrs, Ts):
         self.kp_phi = 1
         self.kd_phi = 0
@@ -58,6 +60,21 @@ class Autopilot:
         
     def compute_throttle_for_airspeed(self, Va_c, Va, *args):
         return self.airspeed_hold_with_throttle_controller.compute_control_input(Va_c, Va, *args)
-
-
     
+    @abstractmethod
+    def set_pitch(self, pitch_c): pass
+
+    @abstractmethod
+    def set_roll(self, roll_c): pass
+
+    @abstractmethod
+    def set_heading(self, chi_c): pass
+    
+    @abstractmethod
+    def set_airspeed_with_throttle(self, Va_c): pass
+
+    @abstractmethod
+    def set_airspeed_with_pitch(self, Va_c): pass
+
+    @abstractmethod
+    def set_altitude_with_pitch(self, h_c): pass        
