@@ -58,4 +58,21 @@ autopilot:
   error_phi_max_deg: 15
   delta_e_max_deg: 45
   error_theta_max_deg: 10
+  roll:
+    ki: 5
+    tau: 0.05
+    zeta: 1.5
+  pitch:
+    ki: 0
+    tau: 0.05
+    zeta: 0.7
+  airspeed:
+    pitch:
+      zeta: 1.5
+    throttle:
+      zeta: 0.05
+  altitude:
+    pitch:
+      zeta: 0.707
+
   
