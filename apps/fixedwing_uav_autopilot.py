@@ -122,7 +122,7 @@ class AppFixedWingUAVAutopilot(FixedWingUAV):
         control_inputs[1] = self.autopilot.compute_delta_a(roll_c, self.dynamics.x[6])
         self.set_control_inputs(control_inputs)        
     
-    def set_airspeed_with_throttle(self, Va_c, Va_trim, delta_e_trim, alpha_trim, delta_t_trim, zeta = 0.5):
+    def set_airspeed_with_throttle(self, Va_c, Va_trim, delta_e_trim, alpha_trim, delta_t_trim):
         Va = np.linalg.norm(self.dynamics.x[3:6])
         S = self.attrs['params']['S']
         rho = self.attrs['params']['rho']
@@ -147,7 +147,7 @@ class AppFixedWingUAVAutopilot(FixedWingUAV):
         control_inputs[3] = delta_delta_t + control_inputs[3]
         self.set_control_inputs(control_inputs)
         
-    def set_altitude_with_pitch(self, h_c, zeta = 0.707):
+    def set_altitude_with_pitch(self, h_c):
         Va = np.linalg.norm(self.dynamics.x[3:6])
         S = self.attrs['params']['S']
         #b = self.attrs['params']['b']
@@ -162,7 +162,7 @@ class AppFixedWingUAVAutopilot(FixedWingUAV):
         omega_h = 0.1
         kp_theta = self.autopilot.config['autopilot']['delta_e_max_deg']/self.autopilot.config['error_theta_max_deg'] * np.sign(atheta_3)
         K_theta_dc = (kp_theta * atheta_3)/(atheta_2 + kp_theta * atheta_3)
-        zeta = self.autopilot.config['altitude']['pitch']
+        zeta = self.autopilot.config['altitude']['pitch']['zeta']
         self.autopilot.altitude_hold_controller.kp = 2.0 * zeta * omega_h/(K_theta_dc * Va)
         self.autopilot.heading_hold_controller.ki = omega_h**2 /(K_theta_dc * Va)
         h = -self.dynamics.x[2]
