@@ -120,7 +120,8 @@ class AppFixedWingUAVAutopilot(FixedWingUAV):
         control_inputs = self.get_control_inputs()
         #-0.018949908534872429
         control_inputs[1] = self.autopilot.compute_delta_a(roll_c, self.dynamics.x[6])
-        self.set_control_inputs(control_inputs)        
+        return control_inputs
+        #self.set_control_inputs(control_inputs)        
     
     def set_airspeed_with_throttle(self, Va_c, Va_trim, delta_e_trim, alpha_trim, delta_t_trim):
         Va = np.linalg.norm(self.dynamics.x[3:6])
@@ -145,7 +146,8 @@ class AppFixedWingUAVAutopilot(FixedWingUAV):
         delta_delta_t = self.autopilot.compute_throttle_for_airspeed(Va_c, Va)
         control_inputs = self.get_control_inputs()
         control_inputs[3] = delta_delta_t + control_inputs[3]
-        self.set_control_inputs(control_inputs)
+        return control_inputs
+        #self.set_control_inputs(control_inputs)
         
     def set_altitude_with_pitch(self, h_c):
         Va = np.linalg.norm(self.dynamics.x[3:6])
