@@ -221,14 +221,35 @@ class AppFixedWingUAVAutopilot(FixedWingUAV):
         control_inputs = self.get_control_inputs()
         q = self.dynamics.x[10]
         control_inputs[0] = self.autopilot.compute_delta_e(pitch_c, self.dynamics.x[7])
-        self.set_control_inputs(control_inputs)
+        #self.set_control_inputs(control_inputs)
+        return control_inputs
         
-    def __call__(self, Va_c, chi_c, h_c, trimmed_state, trimmed_control):
-        self.set_heading(chi_c)
-        self.set_altitude_with_pitch(h_c)
+    def __call__(self, Va_c, chi_c, h_c, trimmed_state, trimmed_control, h_takeoff, h_hold):
+        roll_c = self.set_heading(chi_c)
+        control_inputs = self.set_roll(roll_c)
         delta_e_trim = trimmed_control[0]
         delta_t_trim = trimmed_control[3]
         Va_trim = np.linalg.norm(trimmed_state[0:3])
         alpha_trim = np.arctan(trimmed_state[5]/trimmed_state[3])
         self.set_airspeed_with_throttle(Va_c, Va_trim, delta_e_trim, alpha_trim, delta_t_trim)
         self.set_airspeed_with_pitch(Va_c, Va_trim, delta_e_trim, alpha_trim)
+        h = -self.x[2]
+        if h<h_takeoff:
+            control_inputs += self.set_pitch(self.autopilot.config['delta_e_max_deg'] * np.pi/180.)
+            control_inputs[3] = 1.0
+        elif h>=h_takeoff and h<h_c- h_hold:
+            pitch_c = self.set_airspeed_with_pitch(Va_c, Va_trim, delta_e_trim, alpha_trim)
+            control_inputs += self.set_pitch(pitch_c)
+            control_inputs[3] = 1.0
+        elif h<h_c+h_hold and h>=h_c-h_hold:
+            control_inputs += self.set_airspeed_with_throttle(Va_c, Va_trim, delta_e_trim, alpha_trim, delta_t_trim)
+            pitch_c = self.set_altitude_with_pitch(h_c)
+            control_inputs += self.set_pitch(pitch_c)
+        elif h>=h_c+h_hold:
+            pitch_c = self.set_airspeed_with_pitch(Va_c, Va_trim, delta_e_trim, alpha_trim)
+            control_inputs += self.set_pitch(pitch_c)
+            control_inputs[3] = 0.0
+        self.set_control_inputs(control_inputs)
+            
+        
+        
