@@ -197,7 +197,6 @@ class AppFixedWingUAVAutopilot(FixedWingUAV):
         pitch_c = self.autopilot.compute_pitch_for_airspeed(Va_c, Va)
         return pitch_c
         
-    #TODO: move ki, tau, zeta to config if required
     def set_pitch(self, pitch_c):
         Va = np.linalg.norm(self.dynamics.x[3:6])
         S = self.attrs['params']['S']
