@@ -80,7 +80,7 @@ class AppFixedWingUAVAutopilot(FixedWingUAV):
         trimmed_state, trimmed_control_inputs = self.dynamics.trim(Va, gamma, radius, epsilon=1e-8, kappa=1e-6, max_iters=max_iters)
         self.set_control_inputs(trimmed_control_inputs)
         
-    def set_heading(self, chi_c):
+    def get_roll_for_heading(self, chi_c):
         Va = np.linalg.norm(self.dynamics.x[3:6])
         omega_chi = 0.1
         Vg = Va
@@ -120,10 +120,9 @@ class AppFixedWingUAVAutopilot(FixedWingUAV):
         control_inputs = self.get_control_inputs()
         #-0.018949908534872429
         control_inputs[1] = self.autopilot.compute_delta_a(roll_c, self.dynamics.x[6])
-        return control_inputs
-        #self.set_control_inputs(control_inputs)        
+        self.set_control_inputs(control_inputs)        
     
-    def set_airspeed_with_throttle(self, Va_c, Va_trim, delta_e_trim, alpha_trim, delta_t_trim):
+    def get_throttle_for_airspeed(self, Va_c, Va_trim, delta_e_trim, alpha_trim, delta_t_trim):
         Va = np.linalg.norm(self.dynamics.x[3:6])
         S = self.attrs['params']['S']
         rho = self.attrs['params']['rho']
@@ -144,12 +143,9 @@ class AppFixedWingUAVAutopilot(FixedWingUAV):
         self.autopilot.airspeed_hold_with_throttle_controller.kp = kp_v
         self.autopilot.airspeed_hold_with_pitch_controller.ki = ki_v
         delta_delta_t = self.autopilot.compute_throttle_for_airspeed(Va_c, Va)
-        control_inputs = self.get_control_inputs()
-        control_inputs[3] = delta_delta_t + control_inputs[3]
-        return control_inputs
-        #self.set_control_inputs(control_inputs)
+        return delta_delta_t + self.get_control_inputs()[3]
         
-    def set_altitude_with_pitch(self, h_c):
+    def get_pitch_for_altitude(self, h_c):
         Va = np.linalg.norm(self.dynamics.x[3:6])
         S = self.attrs['params']['S']
         #b = self.attrs['params']['b']
@@ -171,7 +167,7 @@ class AppFixedWingUAVAutopilot(FixedWingUAV):
         pitch_c = self.autopilot.compute_pitch(h_c, h)
         return pitch_c
         
-    def set_airspeed_with_pitch(self, Va_c, Va_trim, delta_e_trim, alpha_trim):
+    def get_pitch_for_airspeed(self, Va_c, Va_trim, delta_e_trim, alpha_trim):
         Va = np.linalg.norm(self.dynamics.x[3:6])
         S = self.attrs['params']['S']
         #b = self.attrs['params']['b']
@@ -222,35 +218,38 @@ class AppFixedWingUAVAutopilot(FixedWingUAV):
         control_inputs = self.get_control_inputs()
         q = self.dynamics.x[10]
         control_inputs[0] = self.autopilot.compute_delta_e(pitch_c, self.dynamics.x[7])
-        #self.set_control_inputs(control_inputs)
-        return control_inputs
+        self.set_control_inputs(control_inputs)
+        
+    def set_throttle(self, throttle_c):
+        control_inputs = self.get_control_inputs()
+        control_inputs[3] = throttle_c
+        self.set_control_inputs(control_inputs)
         
     def __call__(self, Va_c, chi_c, h_c, trimmed_state, trimmed_control, h_takeoff, h_hold):
-        roll_c = self.set_heading(chi_c)
-        control_inputs = self.set_roll(roll_c)
+        roll_c = self.get_roll_for_heading(chi_c)
+        self.set_roll(roll_c)
         delta_e_trim = trimmed_control[0]
         delta_t_trim = trimmed_control[3]
         Va_trim = np.linalg.norm(trimmed_state[0:3])
         alpha_trim = np.arctan(trimmed_state[5]/trimmed_state[3])
-        self.set_airspeed_with_throttle(Va_c, Va_trim, delta_e_trim, alpha_trim, delta_t_trim)
-        self.set_airspeed_with_pitch(Va_c, Va_trim, delta_e_trim, alpha_trim)
+        #self.set_airspeed_with_throttle(Va_c, Va_trim, delta_e_trim, alpha_trim, delta_t_trim)
+        #self.set_airspeed_with_pitch(Va_c, Va_trim, delta_e_trim, alpha_trim)
         h = -self.x[2]
         if h<h_takeoff:
-            control_inputs += self.set_pitch(self.autopilot.config['delta_e_max_deg'] * np.pi/180.)
-            control_inputs[3] = 1.0
+            self.set_pitch(self.autopilot.config['delta_e_max_deg'] * np.pi/180.)
+            self.set_throttle(1.0)
         elif h>=h_takeoff and h<h_c- h_hold:
-            pitch_c = self.set_airspeed_with_pitch(Va_c, Va_trim, delta_e_trim, alpha_trim)
-            control_inputs += self.set_pitch(pitch_c)
-            control_inputs[3] = 1.0
+            pitch_c = self.get_pitch_for_airspeed(Va_c, Va_trim, delta_e_trim, alpha_trim)
+            self.set_pitch(pitch_c)
+            self.set_throttle(1.0)
         elif h<h_c+h_hold and h>=h_c-h_hold:
-            control_inputs += self.set_airspeed_with_throttle(Va_c, Va_trim, delta_e_trim, alpha_trim, delta_t_trim)
-            pitch_c = self.set_altitude_with_pitch(h_c)
-            control_inputs += self.set_pitch(pitch_c)
+            throttle_c = self.get_throttle_for_airspeed(Va_c, Va_trim, delta_e_trim, alpha_trim, delta_t_trim)
+            self.set_throttle(throttle_c)
+            pitch_c = self.get_pitch_for_altitude(h_c)
+            self.set_pitch(pitch_c)
         elif h>=h_c+h_hold:
-            pitch_c = self.set_airspeed_with_pitch(Va_c, Va_trim, delta_e_trim, alpha_trim)
-            control_inputs += self.set_pitch(pitch_c)
-            control_inputs[3] = 0.0
-        self.set_control_inputs(control_inputs)
-            
+            pitch_c = self.get_pitch_for_airspeed(Va_c, Va_trim, delta_e_trim, alpha_trim)
+            self.set_pitch(pitch_c)
+            self.set_throttle(0.0)            
         
         
