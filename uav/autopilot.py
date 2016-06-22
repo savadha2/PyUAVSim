@@ -68,13 +68,16 @@ class Autopilot(object):
     def set_roll(self, roll_c): pass
 
     @abstractmethod
-    def set_heading(self, chi_c): pass
+    def get_roll_for_heading(self, chi_c): pass
     
     @abstractmethod
-    def set_airspeed_with_throttle(self, Va_c): pass
+    def get_throttle_for_airspeed(self, Va_c): pass
 
     @abstractmethod
-    def set_airspeed_with_pitch(self, Va_c): pass
+    def get_pitch_for_airspeed(self, Va_c): pass
 
     @abstractmethod
-    def set_altitude_with_pitch(self, h_c): pass        
+    def get_pitch_for_altitude(self, h_c): pass      
+  
+    @abstractmethod
+    def set_throttle(self, throttle_c): pass        
