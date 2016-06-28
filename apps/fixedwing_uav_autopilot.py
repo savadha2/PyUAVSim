@@ -73,7 +73,7 @@ class AppFixedWingUAVAutopilot(FixedWingUAV):
         self.x0 = x0
         
     def update_view(self):
-        new_vertices = self.viewer.rotate(self.R_bv(self.dynamics.x[6:9])) + self.dynamics.x[0:3]
+        new_vertices = self.viewer.rotate(self.R_bv(self.dynamics.x[6:9])) + self.dynamics.x[0:3] - self.x0[0:3]
         self.viewer.update(new_vertices)
     
     def trim(self, Va, gamma, radius, max_iters):
