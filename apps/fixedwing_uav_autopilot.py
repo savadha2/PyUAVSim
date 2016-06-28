@@ -19,8 +19,6 @@ Created on Thu Dec 17 15:32:53 2015
 @author: sharath
 """
 import numpy as np
-import mpl_toolkits.mplot3d as a3
-import pylab as pl
 from uav.fixed_wing import FixedWingUAV#, FixedWingUAVDynamics
 from uav.autopilot import Autopilot
 from viewer.viewer import Viewer
