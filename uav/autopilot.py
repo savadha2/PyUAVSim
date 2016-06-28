@@ -38,10 +38,8 @@ class Autopilot(object):
         self.kp_v = 1
         self.ki_v = 0
         self.airspeed_hold_with_throttle_controller = PID(self.kp_v, self.ki_v, 0, np.inf, Ts, 0)
-    
-    @property
-    def config(self):
-        return self.attrs
+        
+        self.config = attrs
     
     def compute_delta_a(self, phi_c, phi, *args):
         return self.roll_hold_controller.compute_control_input(phi_c, phi, *args)
