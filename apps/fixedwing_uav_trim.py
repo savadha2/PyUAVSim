@@ -40,16 +40,17 @@ class UAVViewer(Viewer):
         self.wing = [[6, 7, 8, 9]]
         self.tail_wing = [[10, 11, 12, 13]]
         self.tail = [[5, 14, 15]]
-        self.faces = [self.nose, self.fuselage, self.wing, self.tail_wing, self.tail]
+        self.faces = [self.nose, self.fuselage, self.wing, self.tail_wing, self.tail]        
         super(UAVViewer, self).__init__(ax, self.vertices, self.faces, ['r', 'g', 'g', 'g', 'y'])
         
 class AppFixedWingUAVTrim(FixedWingUAV):
     def __init__(self, x0, t0, config, ax):
         super(AppFixedWingUAVTrim, self).__init__(x0, t0, config)
+        self.x0 = x0
         self.viewer = UAVViewer(ax, x0, self.R_bv(x0[6:9]))
         
     def update_view(self):
-        new_vertices = self.viewer.rotate(self.R_bv(self.dynamics.x[6:9])) + self.dynamics.x[0:3]
+        new_vertices = self.viewer.rotate(self.R_bv(self.dynamics.x[6:9])) + self.dynamics.x[0:3] - self.x0[0:3]
         self.viewer.update(new_vertices)
     
     def trim(self, Va, gamma, radius, max_iters):

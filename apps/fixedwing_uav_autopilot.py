@@ -68,9 +68,9 @@ class UAVViewer(Viewer):
 class AppFixedWingUAVAutopilot(FixedWingUAV):
     def __init__(self, x0, t0, config, ax):
         super(AppFixedWingUAVAutopilot, self).__init__(x0, t0, config)
-        
         self.viewer = UAVViewer(ax, x0, self.R_bv(x0[6:9]))
         self.autopilot = Autopilot(config['autopilot'], 1./200.)        
+        self.x0 = x0
         
     def update_view(self):
         new_vertices = self.viewer.rotate(self.R_bv(self.dynamics.x[6:9])) + self.dynamics.x[0:3]
