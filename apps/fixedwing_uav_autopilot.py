@@ -210,15 +210,15 @@ class AppFixedWingUAVAutopilot(FixedWingUAV, Autopilot):
         atheta_1 = -rho * Va * c * S * Cm_q * 0.5 * c
         atheta_2 =  -rho * Va**2 * c *S * Cm_alpha * 0.5/Jy
         atheta_3 = rho * Va**2 * c *S * Cm_delta_e * 0.5/Jy
-        self.autopilot.pitch_hold_controller.kp = self.autopilot.config['delta_e_max_deg']/self.autopilot.config['error_theta_max_deg'] * np.sign(atheta_3)
-        self.autopilot.pitch_hold_controller.ki = self.autopilot.config['roll']['ki']
-        omega_theta = np.sqrt(atheta_2 + self.autopilot.config['delta_e_max_deg']/self.autopilot.config['error_theta_max_deg'] * np.abs(atheta_3))
-        zeta = self.autopilot.config['roll']['zeta']
-        self.autopilot.pitch_hold_controller.kd = (2 * zeta * omega_theta - atheta_1)/atheta_3
-        self.autopilot.pitch_hold_controller.tau = self.autopilot.config['roll']['tau']
+        self.pitch_hold_controller.kp = self.config['delta_e_max_deg']/self.config['error_theta_max_deg'] * np.sign(atheta_3)
+        self.pitch_hold_controller.ki = self.config['pitch']['ki']
+        omega_theta = np.sqrt(atheta_2 + self.config['delta_e_max_deg']/self.config['error_theta_max_deg'] * np.abs(atheta_3))
+        zeta = self.config['pitch']['zeta']
+        self.pitch_hold_controller.kd = (2 * zeta * omega_theta - atheta_1)/atheta_3
+        self.pitch_hold_controller.tau = self.config['pitch']['tau']
         control_inputs = self.get_control_inputs()
         q = self.dynamics.x[10]
-        control_inputs[0] = self.autopilot.compute_delta_e(pitch_c, self.dynamics.x[7])
+        control_inputs[0] = self.compute_delta_e(pitch_c, self.dynamics.x[7], -q)
         self.set_control_inputs(control_inputs)
         
     def set_throttle(self, throttle_c):
