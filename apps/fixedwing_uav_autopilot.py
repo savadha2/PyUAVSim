@@ -79,7 +79,6 @@ class AppFixedWingUAVAutopilot(FixedWingUAV, Autopilot):
     
     def trim(self, Va, gamma, radius, max_iters):
         self.trimmed_state, self.trimmed_control = self.dynamics.trim(Va, gamma, radius, epsilon=1e-8, kappa=1e-6, max_iters=max_iters)
-        self.set_control_inputs(self.trimmed_control)
         
     def get_roll_for_heading(self, chi_c):
         Va = np.linalg.norm(self.dynamics.x[3:6])
