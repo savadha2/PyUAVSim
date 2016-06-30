@@ -142,7 +142,8 @@ class AppFixedWingUAVAutopilot(FixedWingUAV, Autopilot):
         self.airspeed_hold_with_throttle_controller.kp = kp_v
         self.airspeed_hold_with_pitch_controller.ki = ki_v
         delta_delta_t = self.compute_throttle_for_airspeed(Va_c, Va)
-        return delta_delta_t + self.get_control_inputs()[3]
+        delta_t = delta_delta_t + self.get_control_inputs()[3]
+        return max(min(delta_t, 1.0), 0)
         
     def get_pitch_for_altitude(self, h_c):
         Va = np.linalg.norm(self.dynamics.x[3:6])
