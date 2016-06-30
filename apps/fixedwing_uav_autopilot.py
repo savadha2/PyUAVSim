@@ -247,26 +247,22 @@ class AppFixedWingUAVAutopilot(FixedWingUAV, Autopilot):
         if Va > 0:
             roll_c = self.get_roll_for_heading(chi_c)
             self.set_roll(roll_c)
-        delta_e_trim = self.trimmed_control[0]
-        delta_t_trim = self.trimmed_control[3]
-        Va_trim = np.linalg.norm(self.trimmed_state[0:3])
-        alpha_trim = np.arctan(self.trimmed_state[5]/self.trimmed_state[3])
         h = -self.dynamics.x[2]
         if h<h_takeoff:
             if Va > 0:
                 self.set_pitch(self.config['error_theta_max_deg'] * np.pi/180 * 0.5)
             self.set_throttle(1.0)
         elif h>=h_takeoff and h<h_c- h_hold:
-            pitch_c = self.get_pitch_for_airspeed(Va_c, Va_trim, delta_e_trim, alpha_trim)
+            pitch_c = self.get_pitch_for_airspeed(Va_c, self.Va_trim, self.delta_e_trim, self.alpha_trim)
             self.set_pitch(pitch_c)
             self.set_throttle(1.0)
         elif h<h_c+h_hold and h>=h_c-h_hold:
-            throttle_c = self.get_throttle_for_airspeed(Va_c, Va_trim, delta_e_trim, alpha_trim, delta_t_trim)
+            throttle_c = self.get_throttle_for_airspeed(Va_c, self.Va_trim, self.delta_e_trim, self.alpha_trim, self.delta_t_trim)
             self.set_throttle(throttle_c)
             pitch_c = self.get_pitch_for_altitude(h_c)
             self.set_pitch(pitch_c)
         elif h>=h_c+h_hold:
-            pitch_c = self.get_pitch_for_airspeed(Va_c, Va_trim, delta_e_trim, alpha_trim)
+            pitch_c = self.get_pitch_for_airspeed(Va_c, self.Va_trim, self.delta_e_trim, self.alpha_trim)
             self.set_pitch(pitch_c)
             self.set_throttle(0.0)            
         
