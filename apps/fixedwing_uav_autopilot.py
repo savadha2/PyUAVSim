@@ -236,7 +236,7 @@ class AppFixedWingUAVAutopilot(FixedWingUAV, Autopilot):
         alpha_trim = np.arctan(self.trimmed_state[5]/self.trimmed_state[3])
         h = -self.dynamics.x[2]
         if h<h_takeoff:
-            self.set_pitch(self.config['delta_e_max_deg'] * np.pi/180.)
+            self.set_pitch(self.config['error_theta_max_deg'] * np.pi/180 * 0.5)
             self.set_throttle(1.0)
         elif h>=h_takeoff and h<h_c- h_hold:
             pitch_c = self.get_pitch_for_airspeed(Va_c, Va_trim, delta_e_trim, alpha_trim)
