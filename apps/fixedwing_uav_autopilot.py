@@ -226,6 +226,22 @@ class AppFixedWingUAVAutopilot(FixedWingUAV, Autopilot):
         control_inputs[3] = throttle_c
         self.set_control_inputs(control_inputs)
         
+    @property
+    def Va_trim(self):
+        return np.linalg.norm(self.trimmed_state[0:3])
+
+    @property
+    def alpha_trim(self):
+        return np.arctan(self.trimmed_state[5]/self.trimmed_state[3])
+
+    @property
+    def delta_t_trim(self):
+        return self.trimmed_control[3]
+
+    @property
+    def delta_e_trim(self):
+        return self.trimmed_control[0]
+
     def __call__(self, Va_c, chi_c, h_c, h_takeoff, h_hold):
         Va = np.linalg.norm(self.dynamics.x[0:3])
         if Va > 0:
