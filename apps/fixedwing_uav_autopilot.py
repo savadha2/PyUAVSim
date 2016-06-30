@@ -69,6 +69,8 @@ class AppFixedWingUAVAutopilot(FixedWingUAV, Autopilot):
         Autopilot.__init__(self, self.attrs['autopilot'], 1./200.)        
         self.x0 = x0
         self.viewer = UAVViewer(ax, x0, self.R_bv(x0[6:9]))        
+        self.trimmed_state = None
+        self.trimmed_control = None
         #self = Autopilot(self.attrs['autopilot'], 1./200.)        
         
     def update_view(self):
@@ -76,8 +78,8 @@ class AppFixedWingUAVAutopilot(FixedWingUAV, Autopilot):
         self.viewer.update(new_vertices)
     
     def trim(self, Va, gamma, radius, max_iters):
-        trimmed_state, trimmed_control_inputs = self.dynamics.trim(Va, gamma, radius, epsilon=1e-8, kappa=1e-6, max_iters=max_iters)
-        self.set_control_inputs(trimmed_control_inputs)
+        self.trimmed_state, self.trimmed_control = self.dynamics.trim(Va, gamma, radius, epsilon=1e-8, kappa=1e-6, max_iters=max_iters)
+        self.set_control_inputs(self.trimmed_control)
         
     def get_roll_for_heading(self, chi_c):
         Va = np.linalg.norm(self.dynamics.x[3:6])
@@ -225,13 +227,13 @@ class AppFixedWingUAVAutopilot(FixedWingUAV, Autopilot):
         control_inputs[3] = throttle_c
         self.set_control_inputs(control_inputs)
         
-    def __call__(self, Va_c, chi_c, h_c, trimmed_state, trimmed_control, h_takeoff, h_hold):
+    def __call__(self, Va_c, chi_c, h_c, h_takeoff, h_hold):
         roll_c = self.get_roll_for_heading(chi_c)
         self.set_roll(roll_c)
-        delta_e_trim = trimmed_control[0]
-        delta_t_trim = trimmed_control[3]
-        Va_trim = np.linalg.norm(trimmed_state[0:3])
-        alpha_trim = np.arctan(trimmed_state[5]/trimmed_state[3])
+        delta_e_trim = self.trimmed_control[0]
+        delta_t_trim = self.trimmed_control[3]
+        Va_trim = np.linalg.norm(self.trimmed_state[0:3])
+        alpha_trim = np.arctan(self.trimmed_state[5]/self.trimmed_state[3])
         #self.set_airspeed_with_throttle(Va_c, Va_trim, delta_e_trim, alpha_trim, delta_t_trim)
         #self.set_airspeed_with_pitch(Va_c, Va_trim, delta_e_trim, alpha_trim)
         h = -self.x[2]
