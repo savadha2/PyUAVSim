@@ -67,8 +67,17 @@ class  FixedWingUAVDynamics(DynamicsBase):
         r = y[11]        
 
         Va = np.sqrt(u**2 + v**2 + w**2)
-        alpha = np.arctan(w/u)
-        beta = np.arcsin(v/Va)
+        if u > 0:
+            alpha = np.arctan(w/u)
+        elif Va == 0:
+            alpha = 0
+        else:
+            alpha = np.pi/2
+
+        if Va > 0:
+            beta = np.arcsin(v/Va)
+        else:
+            beta = 0
                 
         delta_e = control_inputs[0]
         delta_a = control_inputs[1]
@@ -86,7 +95,7 @@ class  FixedWingUAVDynamics(DynamicsBase):
             c2 = np.exp(M * (alpha + alpha_0))
             sigmoid_alpha = (1 + c1 + c2)/((1 + c1) * (1 + c2))
             CL_alpha_NL = (1. - sigmoid_alpha) * (CL0 + CL_alpha * alpha) + sigmoid_alpha * 2. * np.sign(alpha) * np.sin(alpha) * np.sin(alpha) * np.cos(alpha)
-            lift = 0.5 * rho * Va**2 * S * (CL_alpha_NL + CL_q * c * q * 0.5/Va + CL_delta_e * delta_e)
+            lift = 0.5 * rho * S * (CL_alpha_NL * Va**2 + CL_q * c * q * 0.5 * Va + CL_delta_e * delta_e * Va**2)
 
             CD0 = Clong_coeffs['CD0']
             CD_alpha = Clong_coeffs['CD_alpha']
@@ -95,7 +104,7 @@ class  FixedWingUAVDynamics(DynamicsBase):
             CD_p = Clong_coeffs['CD_p']
             AR = b**2/S
             CD_alpha = CD_p + (CL0 + CL_alpha * alpha)**2/(np.pi * e * AR)
-            drag = 0.5 * rho * Va**2 * S * (CD_alpha + CD_q * c * q * 0.5/Va + CD_delta_e * delta_e)
+            drag = 0.5 * rho * S * (CD_alpha * Va**2 + CD_q * c * q * 0.5 * Va + CD_delta_e * delta_e * Va**2)
             
             Cm0 = Clong_coeffs['Cm0']
             Cm_alpha = Clong_coeffs['Cm_alpha']
@@ -103,21 +112,21 @@ class  FixedWingUAVDynamics(DynamicsBase):
             Cm_delta_e = Clong_coeffs['Cm_delta_e']
             Cm_alpha = Cm0 + Cm_alpha * alpha
             #delta_e = -Cm_alpha/Cm_delta_e
-            m = 0.5 * rho * Va**2 * S * c * (Cm_alpha + Cm_q * c * q * 0.5/Va + Cm_delta_e * delta_e)
+            m = 0.5 * rho * S * c * (Cm_alpha * Va**2 + Cm_q * c * q * 0.5 * Va + Cm_delta_e * delta_e * Va**2)
 
             fx = -drag * np.cos(alpha) + lift * np.sin(alpha)
             fz = -drag * np.sin(alpha) - lift * np.cos(alpha)
             return fx, fz, m
             
         def lateral_forces_moments():#rho, b, S, Va, lateral_coeffs, beta, p, r, delta_a, delta_r):
-            const = 0.5 * rho * Va**2 * S
+            const = 0.5 * rho * S
             CY0 = Clateral_coeffs['CY0']
             CY_beta = Clateral_coeffs['CY_beta']
             CY_p = Clateral_coeffs['CY_p']
             CY_r = Clateral_coeffs['CY_r']
             CY_delta_a = Clateral_coeffs['CY_delta_a']
             CY_delta_r = Clateral_coeffs['CY_delta_r']
-            fy = const * (CY0 + CY_beta * beta + CY_p * b * p * 0.5/Va + CY_r * r * b * 0.5/Va + CY_delta_a * delta_a + CY_delta_r * delta_r)
+            fy = const * (CY0 * Va**2 + CY_beta * beta * Va**2 + CY_p * b * p * 0.5 * Va + CY_r * r * b * 0.5 * Va + CY_delta_a * delta_a * Va**2 + CY_delta_r * delta_r * Va**2)
             
             Cl0 = Clateral_coeffs['Cl0']
             Cl_beta = Clateral_coeffs['Cl_beta']
@@ -125,7 +134,7 @@ class  FixedWingUAVDynamics(DynamicsBase):
             Cl_r = Clateral_coeffs['Cl_r']
             Cl_delta_a = Clateral_coeffs['Cl_delta_a']
             Cl_delta_r = Clateral_coeffs['Cl_delta_r']
-            l = b * const * (Cl0 + Cl_beta * beta + Cl_p * b * p * 0.5/Va + Cl_r * r * b * 0.5/Va + Cl_delta_a * delta_a + Cl_delta_r * delta_r)
+            l = b * const * (Cl0 * Va**2 + Cl_beta * beta * Va**2 + Cl_p * b * p * 0.5 * Va + Cl_r * r * b * 0.5 * Va + Cl_delta_a * delta_a * Va**2 + Cl_delta_r * delta_r * Va**2)
 
             Cn0 = Clateral_coeffs['Cn0']
             Cn_beta = Clateral_coeffs['Cn_beta']
@@ -133,7 +142,7 @@ class  FixedWingUAVDynamics(DynamicsBase):
             Cn_r = Clateral_coeffs['Cn_r']
             Cn_delta_a = Clateral_coeffs['Cn_delta_a']
             Cn_delta_r = Clateral_coeffs['Cn_delta_r']
-            n = b * const * (Cn0 + Cn_beta * beta + Cn_p * b * p * 0.5/Va + Cn_r * r * b * 0.5/Va + Cn_delta_a * delta_a + Cn_delta_r * delta_r)
+            n = b * const * (Cn0 * Va**2 + Cn_beta * beta * Va**2 + Cn_p * b * p * 0.5 * Va + Cn_r * r * b * 0.5 * Va + Cn_delta_a * delta_a * Va**2 + Cn_delta_r * delta_r * Va**2)
             return fy, l, n
             
         def gravitational_forces():#mass, theta, phi):
@@ -169,7 +178,6 @@ class  FixedWingUAVDynamics(DynamicsBase):
         l = l_aerodynamic + l_prop        
         m = m_aerodynamic + m_prop        
         n = n_aerodynamic + n_prop
-        
         return [fx, fy, fz], [l, m, n]
         
     @staticmethod
@@ -223,6 +231,7 @@ class  FixedWingUAVDynamics(DynamicsBase):
         dy[0] = cp * cy * u + (sr * sp * cy - cr * sy) * v + (cr * sp * cy + sr * sy) * w
         dy[1] = cp * sy * u + (sr * sp * sy + cr * cy) * v + (cr * sp * sy - sr * cy) * w
         dy[2] = -sp * u + sr * cp * v + cr * cp * w
+        #print fx/mass
         dy[3] = r * v - q * w + fx/mass
         dy[4] = p * w - r * u + fy/mass
         dy[5] = q * u - p * v + fz/mass

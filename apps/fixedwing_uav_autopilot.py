@@ -228,15 +228,18 @@ class AppFixedWingUAVAutopilot(FixedWingUAV, Autopilot):
         self.set_control_inputs(control_inputs)
         
     def __call__(self, Va_c, chi_c, h_c, h_takeoff, h_hold):
-        roll_c = self.get_roll_for_heading(chi_c)
-        self.set_roll(roll_c)
+        Va = np.linalg.norm(self.dynamics.x[0:3])
+        if Va > 0:
+            roll_c = self.get_roll_for_heading(chi_c)
+            self.set_roll(roll_c)
         delta_e_trim = self.trimmed_control[0]
         delta_t_trim = self.trimmed_control[3]
         Va_trim = np.linalg.norm(self.trimmed_state[0:3])
         alpha_trim = np.arctan(self.trimmed_state[5]/self.trimmed_state[3])
         h = -self.dynamics.x[2]
         if h<h_takeoff:
-            self.set_pitch(self.config['error_theta_max_deg'] * np.pi/180 * 0.5)
+            if Va > 0:
+                self.set_pitch(self.config['error_theta_max_deg'] * np.pi/180 * 0.5)
             self.set_throttle(1.0)
         elif h>=h_takeoff and h<h_c- h_hold:
             pitch_c = self.get_pitch_for_airspeed(Va_c, Va_trim, delta_e_trim, alpha_trim)
