@@ -122,7 +122,11 @@ class AppFixedWingUAVAutopilot(FixedWingUAV, Autopilot):
         control_inputs[1] = self.compute_delta_a(roll_c, self.dynamics.x[6])
         self.set_control_inputs(control_inputs)        
     
-    def get_throttle_for_airspeed(self, Va_c, Va_trim, delta_e_trim, alpha_trim, delta_t_trim):
+    def get_throttle_for_airspeed(self, Va_c):
+        Va_trim = self.Va_trim
+        alpha_trim = self.alpha_trim
+        delta_e_trim = self.delta_e_trim
+        delta_t_trim = self.delta_t_trim
         Va = np.linalg.norm(self.dynamics.x[3:6])
         S = self.attrs['params']['S']
         rho = self.attrs['params']['rho']
@@ -168,7 +172,10 @@ class AppFixedWingUAVAutopilot(FixedWingUAV, Autopilot):
         pitch_c = self.compute_pitch(h_c, h)
         return pitch_c
         
-    def get_pitch_for_airspeed(self, Va_c, Va_trim, delta_e_trim, alpha_trim):
+    def get_pitch_for_airspeed(self, Va_c):
+        Va_trim = self.Va_trim
+        alpha_trim = self.alpha_trim
+        delta_e_trim = self.delta_e_trim
         Va = np.linalg.norm(self.dynamics.x[3:6])
         S = self.attrs['params']['S']
         #b = self.attrs['params']['b']
@@ -253,16 +260,16 @@ class AppFixedWingUAVAutopilot(FixedWingUAV, Autopilot):
                 self.set_pitch(self.config['error_theta_max_deg'] * np.pi/180 * 0.5)
             self.set_throttle(1.0)
         elif h>=h_takeoff and h<h_c- h_hold:
-            pitch_c = self.get_pitch_for_airspeed(Va_c, self.Va_trim, self.delta_e_trim, self.alpha_trim)
+            pitch_c = self.get_pitch_for_airspeed(Va_c)
             self.set_pitch(pitch_c)
             self.set_throttle(1.0)
         elif h<h_c+h_hold and h>=h_c-h_hold:
-            throttle_c = self.get_throttle_for_airspeed(Va_c, self.Va_trim, self.delta_e_trim, self.alpha_trim, self.delta_t_trim)
+            throttle_c = self.get_throttle_for_airspeed(Va_c)
             self.set_throttle(throttle_c)
             pitch_c = self.get_pitch_for_altitude(h_c)
             self.set_pitch(pitch_c)
         elif h>=h_c+h_hold:
-            pitch_c = self.get_pitch_for_airspeed(Va_c, self.Va_trim, self.delta_e_trim, self.alpha_trim)
+            pitch_c = self.get_pitch_for_airspeed(Va_c)
             self.set_pitch(pitch_c)
             self.set_throttle(0.0)            
         
