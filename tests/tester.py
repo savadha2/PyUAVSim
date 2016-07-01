@@ -8,12 +8,11 @@ This is not unit testing!
 
 """
 from apps.fixedwing_uav_autopilot import AppFixedWingUAVAutopilot
-#from apps.fixedwing_uav_trim import AppFixedWingUAVTrim
+from apps.fixedwing_uav_trim import AppFixedWingUAVTrim
 import numpy as np
 import mpl_toolkits.mplot3d as a3
 import pylab as pl
 
-#@TODO: tester for trim
 #@TODO: barebones right now, will add features and change interfaces as this evolves
 class Tester:
     def __init__(self, x0, t0, config_path, ax, T_sim, dt = 1/200.0):
@@ -28,6 +27,25 @@ class Tester:
         self.alpha_beta_gamma = np.zeros((self.npoints, 3), dtype = np.double)
         self.t = np.zeros((self.npoints,), dtype = np.double)
         
+    def test_trim(self, Va = 35, gamma = 0.025, R = 100, iters = 1500, animate = True):
+        uav = AppFixedWingUAVTrim(self.x0, self.t0, self.config_path, self.ax)
+        uav.trim(Va, 0.025, R, iters)
+        # trim routine above sets the control inputs too unlike the other routines. Beware!
+        for m in range(self.npoints):
+            uav.update_state(dt = self.dt)
+            self.x[m, 0:12] = uav.dynamics.x[0:12]
+            self.alpha_beta_gamma[m, 0] = np.arctan(self.x[m , 5]/self.x[m , 3])
+            v = np.linalg.norm(self.x[m, 3:6])
+            self.alpha_beta_gamma[m, 1] = np.arcsin(self.x[m , 4]/v)
+            theta = uav.dynamics.x[7]
+            self.alpha_beta_gamma[m, 2] = theta - self.alpha_beta_gamma[m, 0]
+            self.t[m] = uav.dynamics.t
+            if m%5==0 and animate is True:
+                uav.update_view()
+                #pl.hold('on')
+                self.ax.plot(self.x[0:m:5, 1], self.x[0:m:5, 0], -self.x[0:m:5, 2], '.g')
+                pl.pause(.01)
+
     def test_autopilot(self, Va_trim = 70, gamma_trim = 0, R = np.inf, iters = 1500, animate = True):
         uav = AppFixedWingUAVAutopilot(self.x0, self.t0, self.config_path, self.ax)
         uav.trim(Va_trim, gamma_trim, R, iters)
@@ -124,7 +142,8 @@ def main():
     
     initial_state = [0, 0, 0, 0.0, 0., 0.0, 0, 0, 0, 0, 0, 0]
     tester = Tester(initial_state, 0, '../configs/aerosonde.yaml', ax, T_sim=15.0, dt = 1.0/200.0)
-    tester.test_autopilot(75, 0, np.inf, animate = False)
+    tester.test_autopilot(72.0, 0, 500, animate = True)
+    #tester.test_trim(35.0, 0.025, 100, 15000, animate = True)
     tester.plot()
 
         
