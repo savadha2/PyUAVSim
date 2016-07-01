@@ -48,12 +48,14 @@ class AppFixedWingUAVTrim(FixedWingUAV):
         super(AppFixedWingUAVTrim, self).__init__(x0, t0, config)
         self.x0 = x0
         self.viewer = UAVViewer(ax, x0, self.R_bv(x0[6:9]))
+        self.trimmed_control_inputs = None
+        self.trimmed_state = None
         
     def update_view(self):
         new_vertices = self.viewer.rotate(self.R_bv(self.dynamics.x[6:9])) + self.dynamics.x[0:3] - self.x0[0:3]
         self.viewer.update(new_vertices)
     
     def trim(self, Va, gamma, radius, max_iters):
-        trimmed_state, trimmed_control_inputs = self.dynamics.trim(Va, gamma, radius, epsilon=1e-8, kappa=1e-6, max_iters=max_iters)
+        self.trimmed_state, self.trimmed_control_inputs = self.dynamics.trim(Va, gamma, radius, epsilon=1e-8, kappa=1e-6, max_iters=max_iters)
         #self.set_state(trimmed_state, 0.)
-        self.set_control_inputs(trimmed_control_inputs)
+        self.set_control_inputs(self.trimmed_control_inputs)
