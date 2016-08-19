@@ -14,3 +14,7 @@ Next set of features:
 4. Pathplanner class with RRT 
 5. Wind models is not there due to their slightly complex nature - this will be added at the very end
 
+
+Reference: Small Unmanned Arcraft - Theory and Practice by Randal W. Beard and Timothy W. McLain
+
+
