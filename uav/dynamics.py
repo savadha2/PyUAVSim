@@ -564,7 +564,7 @@ class KinematicGuidanceModelWithCourse(FixedWingUAVGuidanceModel):
 
     def __call__(self, dt, Va_c, h_c, chi_c, h_dot_c = 0., chi_dot_c = 0.):
         self.integrator.set_f_params(self.attrs, self.wind_model, Va_c, h_c, chi_c, h_dot_c, chi_dot_c)
-        self.integrate(dt + self.dynamics.integrator.t)
+        self.integrate(dt + self.integrator.t)
 
 class KinematicGuidanceModelWithRoll(FixedWingUAVGuidanceModel):
     def __init__(self, x0, t0, dt_integration, attrs):
@@ -594,7 +594,7 @@ class KinematicGuidanceModelWithRoll(FixedWingUAVGuidanceModel):
 
     def __call__(self, dt, Va_c, h_c, phi_c, h_dot_c = 0.):
         self.integrator.set_f_params(self.attrs, self.wind_model, Va_c, h_c, phi_c, h_dot_c)
-        self.integrate(dt + self.dynamics.integrator.t)
+        self.integrate(dt + self.integrator.t)
 
 class KinematicGuidanceModelWithPitch(FixedWingUAVGuidanceModel):
     def __init__(self, x0, t0, dt_integration, attrs):
@@ -634,7 +634,7 @@ class KinematicGuidanceModelWithPitch(FixedWingUAVGuidanceModel):
 
     def __call__(self, dt, Va_c, phi_c, pitch_c):
         self.integrator.set_f_params(self.attrs, self.wind_model, Va_c, phi_c, pitch_c)
-        self.integrate(dt + self.dynamics.integrator.t)
+        self.integrate(dt + self.integrator.t)
             
             
             
