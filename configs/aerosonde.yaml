@@ -68,11 +68,11 @@ autopilot:
     zeta: 0.7
   airspeed:
     pitch:
-      zeta: 1.5
+      zeta: .75
     throttle:
       zeta: 0.05
   altitude:
     pitch:
-      zeta: 0.707
+      zeta: 1.0
 
   
