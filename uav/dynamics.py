@@ -503,14 +503,138 @@ class  FixedWingUAVDynamics(DynamicsBase):
         self._control_inputs = inputs
         self.integrator.set_f_params(self.attrs, self._control_inputs, self.partial_forces_and_moments)
         
+from abc import ABCMeta, abstractmethod
+class  FixedWingUAVGuidanceModel(DynamicsBase):
+    __metaclass__ = ABCMeta
+    def __init__(self, x0, t0, dt_integration, attrs):
+        self.attrs = attrs
+        super(FixedWingUAVGuidanceModel, self).__init__(x0, t0, dt_integration)
+        self.t0 = t0
+        self.set_integrator(FixedWingUAVGuidanceModel.model, 'dop853', jac = None, rtol = 1e-8)
         
-            
-            
-            
-            
-            
-            
-            
+    def wind_model(self, Va):
+        return 0.0, 0.0 , 0.0
+
+    @abstractmethod
+    def model(*args):
+        pass
+
+    def state(self):
+        return self.model.x
+
+    #factory method to generate the required model
+    @staticmethod
+    def generate_model(model_type, x0, t0, dt_integration, attrs):
+        if model_type == 'course':
+            return KinematicGuidanceModelWithCourse(x0, t0, dt_integration, attrs)
+        elif model_type == 'roll':
+            return KinematicGuidanceModelWithRoll(x0, t0, dt_integration, attrs)
+        elif model_type == 'pitch':
+            return KinematicGuidanceModelWithPitch(x0, t0, dt_integration, attrs)
+        else:
+            msg = 'model ' + model_type + 'not supported.\n'
+            msg += 'supported model types are (course, roll, pitch)'
+            raise Exception(msg)
+
+class KinematicGuidanceModelWithCourse(FixedWingUAVGuidanceModel):
+    def __init__(self, x0, t0, dt_integration, attrs):
+        super(KinematicGuidanceModelWithCourse, self).__init__(x0, t0, dt_integration)
+
+    @staticmethod
+    def model(t, y, attrs, wind_model, Va_c, h_c, chi_c, h_dot_c, chi_dot_c):
+        b_chi = attrs['b_chi']
+        b_chi_dot = attrs['b_chi_dot']
+        b_h = attrs['b_h']
+        b_h_dot = attrs['b_h_dot']
+        b_Va = attrs['b_Va']
+
+        Va = y[6]
+        chi = y[2]
+        h = y[4]
+        wn, we, wd = wind_model(Va)
+        psi = chi - np.arcsin((-wn * np.sin(chi) + we * np.cos(chi))/Va)
+        dy = np.zeros((7,), dtype = np.double)
+        dy[0] = Va * np.cos(psi) + wn
+        dy[1] = Va * np.sin(psi) + we
+        dy[2] = y[3]
+        dy[3] = b_chi_dot * (chi_dot_c - y[3]) + b_chi * (chi_c - chi)
+        dy[4] = y[5]
+        dy[5] = b_h_dot * (h_dot_c - y[5]) + b_h * (h_c - h)
+        dy[6] = b_Va * (Va_c - Va)
+
+    def __call__(self, dt, Va_c, h_c, chi_c, h_dot_c = 0., chi_dot_c = 0.):
+        self.integrator.set_f_params(self.attrs, self.wind_model, Va_c, h_c, chi_c, h_dot_c, chi_dot_c)
+        self.integrate(dt + self.dynamics.integrator.t)
+
+class KinematicGuidanceModelWithRoll(FixedWingUAVGuidanceModel):
+    def __init__(self, x0, t0, dt_integration, attrs):
+        super(KinematicGuidanceModelWithCourse, self).__init__(x0, t0, dt_integration)
+
+    @staticmethod
+    def model(t, y, attrs, wind_model, Va_c, h_c, phi_c, h_dot_c):
+        g = 9.81
+        b_h = attrs['b_h']
+        b_h_dot = attrs['b_h_dot']
+        b_Va = attrs['b_Va']
+        b_phi = attrs['b_phi']
+
+        Va = y[5]
+        phi = y[6]
+        h = y[3]
+        psi = y[2]
+        wn, we, wd = wind_model(Va)
+        dy = np.zeros((7,), dtype = np.double)
+        dy[0] = Va * np.cos(psi) + wn
+        dy[1] = Va * np.sin(psi) + we
+        dy[2] = g * np.tan(phi)/Va
+        dy[3] = y[4]
+        dy[4] = b_h_dot * (h_dot_c - y[4]) + b_h * (h_c - h)
+        dy[5] = b_Va * (Va_c - Va)
+        dy[6] = b_phi * (phi_c - phi)
+
+    def __call__(self, dt, Va_c, h_c, phi_c, h_dot_c = 0.):
+        self.integrator.set_f_params(self.attrs, self.wind_model, Va_c, h_c, phi_c, h_dot_c)
+        self.integrate(dt + self.dynamics.integrator.t)
+
+class KinematicGuidanceModelWithPitch(FixedWingUAVGuidanceModel):
+    def __init__(self, x0, t0, dt_integration, attrs):
+        super(KinematicGuidanceModelWithCourse, self).__init__(x0, t0, dt_integration)
+
+    @staticmethod
+    def model(t, y, attrs, wind_model, Va_c, phi_c, pitch_c):
+        g = 9.81
+        b_pitch = attrs['b_pitch']
+        b_Va = attrs['b_Va']
+        b_phi = attrs['b_phi']
+
+        Va = y[5]
+        chi = y[3]
+        phi = y[6]
+        pitch = y[4]
+        wn, we, wd = wind_model(Va)
+        psi = chi - np.arcsin((-wn * np.sin(chi) + we * np.cos(chi))/Va)
+        #compute Vg
+        a = 1.
+        b = -2. * (wn * np.cos(chi) * np.cos(pitch) + we * np.sin(chi) * np.cos(pitch) - wd * np.sin(pitch))
+        Vw**2 = wn**2 + we**2 + wd**2
+        c = Vw**2 - Va**2
+        Vg = (-b + np.sqrt(b**2 - 4 * a * c))/(2 * a)
+        #air mass referenced flight path angle
+        num = Vg * np.sin(pitch) + wd
+        den = Va
+        gamma_a = np.arcsin(num/den)
+        dy = np.zeros((7,), dtype = np.double)
+        dy[0] = Va * np.cos(psi) + wn
+        dy[1] = Va * np.sin(psi) + we
+        dy[2] = Va * np.sin(gamma_a) - wd
+        dy[3] = g * np.tan(phi) * np.cos(chi-psi)/Vg
+        dy[4] = b_pitch * (pitch_c - pitch)
+        dy[5] = b_Va * (Va_c - Va)
+        dy[6] = b_phi * (phi_c - phi)
+
+    def __call__(self, dt, Va_c, phi_c, pitch_c):
+        self.integrator.set_f_params(self.attrs, self.wind_model, Va_c, phi_c, pitch_c)
+        self.integrate(dt + self.dynamics.integrator.t)
             
             
             
