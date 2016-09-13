@@ -616,9 +616,9 @@ class KinematicGuidanceModelWithPitch(FixedWingUAVGuidanceModel):
         #compute Vg
         a = 1.
         b = -2. * (wn * np.cos(chi) * np.cos(pitch) + we * np.sin(chi) * np.cos(pitch) - wd * np.sin(pitch))
-        Vw**2 = wn**2 + we**2 + wd**2
-        c = Vw**2 - Va**2
-        Vg = (-b + np.sqrt(b**2 - 4 * a * c))/(2 * a)
+        Vw_sqrd = wn**2 + we**2 + wd**2
+        c = Vw_sqrd - Va**2
+        Vg = (-b + np.sqrt(b**2 - 4 * a * c))/(2. * a)
         #air mass referenced flight path angle
         num = Vg * np.sin(pitch) + wd
         den = Va
