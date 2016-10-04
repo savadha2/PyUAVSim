@@ -19,9 +19,9 @@ class FixedWingUAVPathFollower(object):
         qn = q[0]
         qe = [1]
         qd = q[2]
+        e_p= p - r
         def compute_altitude():
             rd = r[2]
-            e_p= p - r
             n = np.cross(q, np.array([0, 0, 1], dtype = np.double))
             n = n/np.linalg.norm(n)
             s = e_p - np.dot(e_p, n) * n
