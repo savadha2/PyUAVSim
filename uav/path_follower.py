@@ -44,8 +44,9 @@ class FixedWingUAVPathFollower(object):
 
         return compute_altitude(), compute_course_angle()
 
-    def orbit_follower(self, c, rho, lam, uav_state, chi):
+    def orbit_follower(self, c, rho, lam, uav_state):
         p = uav_state[0:3]
+        chi = uav_state[8]
         h_c = -c[2]
         d = np.linalg.norm(c-p)
         psi = np.arctan2(p[1] - c[1], p[0] - c[0])
