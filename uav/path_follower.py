@@ -38,9 +38,8 @@ class FixedWingUAVPathFollower(object):
         def compute_course_angle():
             cchi = np.cos(chi_q)
             schi = np.sin(chi_q)
-            R_pi = np.array([cchi, schi, -schi, cchi], dtype = np.double)
-            e_p = R_pi * (p[0:2] - r[0:2])
-            chi_c = chi_q - self.chi_inf * 2.0 * np.arctan(self.k_path * e_p[1])/np.pi
+            e_py = schi * e_p[0] + cchi * e_p[1]
+            chi_c = chi_q - self.chi_inf * 2.0 * np.arctan(self.k_path * e_py)/np.pi
             return chi_c
 
         return compute_altitude(), compute_course_angle()
