@@ -30,7 +30,7 @@ class FixedWingUAVPathFollower(object):
             h_c = -rd - np.linalg.norm(s[0:2]) * qd * 1.0/np.linalg.norm(q[0:2])
             return h_c
 
-        chi_q = np.arctan(qe, qn)
+        chi_q = np.arctan2(qe, qn)
         while chi_q - chi < -np.pi:
             chi_q = chi_q + 2. * np.pi
 
