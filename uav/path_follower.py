@@ -8,6 +8,7 @@ import numpy as np
 
 class FixedWingUAVPathFollower(object):
     def __init__(self):
+        #@TODO: make the params below configurable
         self.k_path = 0.5
         self.k_orbit = 0.5
         self.chi_inf = np.pi/4.
