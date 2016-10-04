@@ -25,8 +25,6 @@ class FixedWingUAVPathFollower(object):
             n = np.cross(q, np.array([0, 0, 1], dtype = np.double))
             n = n/np.linalg.norm(n)
             s = e_p - np.dot(e_p, n) * n
-            sn = s[0]
-            se = s[1]
             h_c = -rd - np.linalg.norm(s[0:2]) * qd * 1.0/np.linalg.norm(q[0:2])
             return h_c
 
