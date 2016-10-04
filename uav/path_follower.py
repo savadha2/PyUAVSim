@@ -49,7 +49,7 @@ class FixedWingUAVPathFollower(object):
         chi = uav_state[8]
         h_c = -c[2]
         d = np.linalg.norm(c-p)
-        psi = np.arctan2(p[1] - c[1], p[0] - c[0])
+        psi = np.arctan2(c[1] - p[1], c[0] - p[0])
         while psi - chi < -np.pi:
             psi = psi + np.pi * 2.
         while psi - chi > np.pi:
