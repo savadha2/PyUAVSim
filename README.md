@@ -17,4 +17,6 @@ Next set of features:
 
 Reference: Small Unmanned Arcraft - Theory and Practice by Randal W. Beard and Timothy W. McLain
 
+The current plan is to release the first complete version by March 2017. I am looking for contributors. If you are interested, email me (av.sarath@gmail.com - there is no typo)
+
 
