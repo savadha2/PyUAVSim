@@ -14,6 +14,7 @@ Next set of features:
 1. State estimation using kalman filter/variants
 2. Pathplanner class with RRT 
 3. Wind models is not there due to their slightly complex nature - this will be added at the very end
+4. support for quard rotors
 
 
 Reference: Small Unmanned Arcraft - Theory and Practice by Randal W. Beard and Timothy W. McLain
