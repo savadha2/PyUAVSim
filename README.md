@@ -1,7 +1,7 @@
 # PyUAVSim
 Light weight Python simulator for small UAVs
 
-Work in progress (development is slow since I am doing this part time) - The current plan is to release the first complete version by March 2017. I am looking for contributors. If you are interested, email me: av.sarath@gmail.com (there is no typo).
+Work in progress (development is slow since I am doing this part time) - The current plan is to release the first complete version by March 2017. I am looking for contributors. If you are interested, email me.
 
 Completed Feature List:
 1. Autopilot for fixed wing
