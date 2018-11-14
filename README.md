@@ -8,7 +8,7 @@ Completed Feature List:
 3. Path following and Path manager implemented
 4. Changed interfaces so that Users can write apps with the base classes provided
 
-The simulator is near complete with all the necessary bare minimum functional implementation. It should be straightforward to extend its functionality. Feel free to email me (av.sarath@gmail.com) if you have any questions
+The simulator is near complete with all the necessary bare minimum functional implementation. It should be straightforward to extend its functionality. 
 
 Extensions:
 
